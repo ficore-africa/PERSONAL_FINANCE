@@ -738,7 +738,7 @@ GENERAL_TRANSLATIONS = {
         'special_announcement_description': 'Bayanin sanarwa ta musamman.',
         'learn_more': 'Ƙara Koyo',
         'general_mobile_navigation': 'Kewayawa ta Wayar Hannu',
-        'profile_settings': 'Saitunan Bayanan Martaba',
+        'profile_settings': 'Saiti',
         'not_found': 'Ba A Samu Ba',
         'general_page_not_found': 'Shafin Ba A Samu Ba',
         'general_page_not_found_message': 'Shafin da kake nema ba ya nan.',
