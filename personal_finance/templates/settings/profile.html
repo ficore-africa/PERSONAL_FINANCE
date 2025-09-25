@@ -12,19 +12,6 @@
         </div>
     </div>
 
-    <div class="card card-body mb-3 account-type">
-        <p class="mb-0">{{ t('settings_account_type', default='Account Type') }}: 
-            <strong>
-                {% if user.role == 'personal' %}
-                    {{ t('settings_personal_account', default='Personal Account') }}
-                {% elif user.role == 'admin' %}
-                    {{ t('settings_admin_account', default='Admin Account') }}
-                {% endif %}
-            </strong> 
-            <span class="info-icon" title="{{ t('settings_' + user.role + '_account_info', default=user.role|capitalize + ' account gives you access to specific features tailored to your role.') }}">ⓘ</span>
-        </p>
-    </div>
-
     <!-- Explore Your Tools Button Section -->
     <div class="d-grid mb-4">
         {% if user.role == 'personal' %}
