@@ -58,61 +58,7 @@
 </style>
 {% endblock %}
 
-{% block extra_head %}
-<style>
-.dashboard-card {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    border: none;
-    border-radius: 12px;
-}
-.dashboard-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-}
-.metric-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 15px;
-}
-.metric-card.income {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-}
-.metric-card.expense {
-    background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
-}
-.metric-card.budget {
-    background: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%);
-}
-.progress-ring {
-    width: 80px;
-    height: 80px;
-}
-.progress-ring circle {
-    fill: transparent;
-    stroke-width: 8;
-    stroke-linecap: round;
-    transform: rotate(-90deg);
-    transform-origin: 50% 50%;
-}
-.recent-activity-item {
-    border-left: 4px solid #007bff;
-    padding-left: 15px;
-    margin-bottom: 15px;
-    transition: all 0.3s ease;
-}
-.recent-activity-item:hover {
-    background-color: rgba(0,123,255,0.05);
-    border-radius: 8px;
-    padding: 10px 15px;
-    margin-left: -10px;
-}
-.insight-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 15px;
-}
-</style>
-{% endblock %}
+
 
 {% block content %}
 <div class="container-fluid mt-4">
