@@ -766,7 +766,7 @@ GENERAL_TRANSLATIONS = {
         'reports_generate_report': 'Ƙirƙiri Rahoto',
         # Missing general translation keys in Hausa
         'Track your expenses daily to stay within budget.': 'Bincika kashe kuɗin ku yau da kullum don kasancewa cikin kasafin kuɗi.',
-        'Consider ajo savings for consistent group contributions.': 'Yi la'akari da tanadi na ajo don gudummawar ƙungiya mai dorewa.',
+        'Consider ajo savings for consistent group contributions.': 'Yi la\'akari da tanadi na ajo don gudummawar ƙungiya mai dorewa.',
         'Review data subscriptions to reduce unnecessary costs.': 'Duba biyan kuɗin bayanai don rage kashe kuɗi maras muhimmanci.',
         'Plan for dependents to ensure financial stability.': 'Shirya wa masu dogara da ku don tabbatar da kwanciyar hankali na kuɗi.',
         'general_recent_activity': 'Ayyukan Kwanan Nan',
