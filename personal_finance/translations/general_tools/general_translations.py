@@ -378,6 +378,12 @@ GENERAL_TRANSLATIONS = {
         'reports_start_date': 'Start Date',
         'reports_end_date': 'End Date',
         'reports_generate_report': 'Generate Report',
+        # Missing general translation keys
+        'Track your expenses daily to stay within budget.': 'Track your expenses daily to stay within budget.',
+        'Consider ajo savings for consistent group contributions.': 'Consider ajo savings for consistent group contributions.',
+        'Review data subscriptions to reduce unnecessary costs.': 'Review data subscriptions to reduce unnecessary costs.',
+        'Plan for dependents to ensure financial stability.': 'Plan for dependents to ensure financial stability.',
+        'general_recent_activity': 'Recent Activity',
     },
     'ha': {
         # Personal Finance module
@@ -758,5 +764,11 @@ GENERAL_TRANSLATIONS = {
         'reports_start_date': 'Ranar Fara',
         'reports_end_date': 'Ranar Ƙarshe',
         'reports_generate_report': 'Ƙirƙiri Rahoto',
+        # Missing general translation keys in Hausa
+        'Track your expenses daily to stay within budget.': 'Bincika kashe kuɗin ku yau da kullum don kasancewa cikin kasafin kuɗi.',
+        'Consider ajo savings for consistent group contributions.': 'Yi la'akari da tanadi na ajo don gudummawar ƙungiya mai dorewa.',
+        'Review data subscriptions to reduce unnecessary costs.': 'Duba biyan kuɗin bayanai don rage kashe kuɗi maras muhimmanci.',
+        'Plan for dependents to ensure financial stability.': 'Shirya wa masu dogara da ku don tabbatar da kwanciyar hankali na kuɗi.',
+        'general_recent_activity': 'Ayyukan Kwanan Nan',
     }
 }
