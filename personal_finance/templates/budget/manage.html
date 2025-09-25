@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block title %}{{ t('budget_manage_budgets', default='Manage Budgets') }}{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    {% set tool_name = 'budget_manage_budgets' %}
+    {% set tool_icon = 'fa-edit' %}
+    {% set subtitle = t('budget_manage_description', default='Review, edit, and organize your existing budgets') %}
+    {% include 'tool_header.html' %}
+
+    <!-- Navigation Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('budget.index') }}">{{ t('budget_title', default='Budget Planner') }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ t('budget_manage_budgets', default='Manage Budgets') }}</li>
+        </ol>
+    </nav>
+
+    {% if budgets %}
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="mb-0">{{ t('budget_your_budgets', default='Your Budgets') }} ({{ budgets|length }})</h5>
+            <a href="{{ url_for('budget.new') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>{{ t('budget_create_budget', default='Create Budget') }}
+            </a>
+        </div>
+
+        <div class="row">
+            {% for budget_id, budget in budgets.items() %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                {% if budget.get('budget_name') %}
+                                    <h6 class="mb-0">{{ budget.get('budget_name') }}</h6>
+                                {% else %}
+                                    <h6 class="mb-0">{{ t('budget_budget', default='Budget') }} #{{ loop.index }}</h6>
+                                {% endif %}
+                                <small class="text-muted">{{ budget.get('created_at', 'N/A') }}</small>
+                            </div>
+                            <span class="badge bg-{{ 'success' if budget.get('surplus_deficit', 0)|float >= 0 else 'danger' }}">
+                                {{ t('budget_balance', default='Balance') }}: {{ budget.get('surplus_deficit_formatted', '0.00') }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <!-- Budget Summary -->
+                            <div class="row text-center mb-3">
+                                <div class="col-3">
+                                    <small class="text-muted d-block">{{ t('budget_income', default='Income') }}</small>
+                                    <strong class="text-primary">{{ budget.get('total_income', budget.get('income', '0.00')) }}</strong>
+                                </div>
+                                <div class="col-3">
+                                    <small class="text-muted d-block">{{ t('budget_expenses', default='Expenses') }}</small>
+                                    <strong class="text-warning">{{ budget.get('total_expenses', '0.00') }}</strong>
+                                </div>
+                                <div class="col-3">
+                                    <small class="text-muted d-block">{{ t('budget_investments', default='Investments') }}</small>
+                                    <strong class="text-info">{{ budget.get('total_investments', '0.00') }}</strong>
+                                </div>
+                                <div class="col-3">
+                                    <small class="text-muted d-block">{{ t('budget_savings', default='Savings') }}</small>
+                                    <strong class="text-success">{{ budget.get('total_savings', budget.get('savings_goal', '0.00')) }}</strong>
+                                </div>
+                            </div>
+
+                            <!-- Items Breakdown -->
+                            <div class="row">
+                                <!-- Income Items -->
+                                {% if budget.get('income_items') %}
+                                    <div class="col-6 mb-2">
+                                        <small class="text-muted d-block mb-1"><i class="fas fa-money-bill-wave text-primary me-1"></i>{{ t('budget_income_sources', default='Income Sources') }}</small>
+                                        <ul class="list-unstyled small">
+                                            {% for item in budget.get('income_items', [])[:3] %}
+                                                <li class="mb-1">{{ item.name }}: {{ "%.2f"|format(item.amount) }}</li>
+                                            {% endfor %}
+                                            {% if budget.get('income_items')|length > 3 %}
+                                                <li class="text-muted">{{ t('budget_and_more', default='and {count} more...')|replace('{count}', (budget.get('income_items')|length - 3)|string) }}</li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Expense Items -->
+                                {% if budget.get('expense_items') %}
+                                    <div class="col-6 mb-2">
+                                        <small class="text-muted d-block mb-1"><i class="fas fa-receipt text-warning me-1"></i>{{ t('budget_expenses', default='Expenses') }}</small>
+                                        <ul class="list-unstyled small">
+                                            {% for item in budget.get('expense_items', [])[:3] %}
+                                                <li class="mb-1">{{ item.name }}: {{ "%.2f"|format(item.amount) }}</li>
+                                            {% endfor %}
+                                            {% if budget.get('expense_items')|length > 3 %}
+                                                <li class="text-muted">{{ t('budget_and_more', default='and {count} more...')|replace('{count}', (budget.get('expense_items')|length - 3)|string) }}</li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Investment Items -->
+                                {% if budget.get('investment_items') %}
+                                    <div class="col-6 mb-2">
+                                        <small class="text-muted d-block mb-1"><i class="fas fa-chart-line text-info me-1"></i>{{ t('budget_investments', default='Investments') }}</small>
+                                        <ul class="list-unstyled small">
+                                            {% for item in budget.get('investment_items', [])[:3] %}
+                                                <li class="mb-1">{{ item.name }}: {{ "%.2f"|format(item.amount) }}</li>
+                                            {% endfor %}
+                                            {% if budget.get('investment_items')|length > 3 %}
+                                                <li class="text-muted">{{ t('budget_and_more', default='and {count} more...')|replace('{count}', (budget.get('investment_items')|length - 3)|string) }}</li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Savings Items -->
+                                {% if budget.get('savings_items') %}
+                                    <div class="col-6 mb-2">
+                                        <small class="text-muted d-block mb-1"><i class="fas fa-piggy-bank text-success me-1"></i>{{ t('budget_savings', default='Savings') }}</small>
+                                        <ul class="list-unstyled small">
+                                            {% for item in budget.get('savings_items', [])[:3] %}
+                                                <li class="mb-1">{{ item.name }}: {{ "%.2f"|format(item.amount) }}</li>
+                                            {% endfor %}
+                                            {% if budget.get('savings_items')|length > 3 %}
+                                                <li class="text-muted">{{ t('budget_and_more', default='and {count} more...')|replace('{count}', (budget.get('savings_items')|length - 3)|string) }}</li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                <div>
+                                    {% if current_user.is_authenticated %}
+                                        <small class="text-muted">{{ budget.get('user_email', 'N/A') }}</small>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <form method="POST" action="{{ url_for('budget.manage') }}" style="display: inline;" class="me-1">
+                                        {{ csrf_token() }}
+                                        <input type="hidden" name="budget_id" value="{{ budget_id }}">
+                                        <input type="hidden" name="action" value="duplicate">
+                                        <button type="submit" class="btn btn-outline-primary btn-sm" title="{{ t('budget_duplicate_budget', default='Duplicate this budget for reuse') }}">
+                                            <i class="fas fa-copy me-1"></i>{{ t('budget_duplicate', default='Duplicate') }}
+                                        </button>
+                                    </form>
+                                    <a href="{{ url_for('budget.export_pdf', budget_id=budget_id) }}" class="btn btn-outline-success btn-sm me-1" title="{{ t('budget_export_single_pdf_cost', default='Export Budget PDF (1 FC)') }}">
+                                        <i class="fas fa-file-pdf me-1"></i>{{ t('budget_export', default='Export') }}
+                                    </a>
+                                    <form method="POST" action="{{ url_for('budget.manage') }}" style="display: inline;">
+                                        {{ csrf_token() }}
+                                        <input type="hidden" name="budget_id" value="{{ budget_id }}">
+                                        <input type="hidden" name="action" value="delete">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('{{ t('budget_confirm_delete', default='Are you sure you want to delete this budget?') | e }}');">
+                                            <i class="fas fa-trash me-1"></i>{{ t('general_delete', default='Delete') }}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination or Load More (if needed) -->
+        {% if budgets|length >= 20 %}
+            <div class="text-center mt-4">
+                <p class="text-muted">{{ t('budget_showing_recent', default='Showing most recent budgets') }}</p>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-chart-pie fa-4x mb-3 text-muted"></i>
+            <h4 class="text-muted">{{ t('budget_no_budgets_empty_state', default='No budgets created yet') }}</h4>
+            <p class="text-muted">{{ t('budget_get_started_description', default='Create your first budget to start managing your finances effectively') }}</p>
+            <a href="{{ url_for('budget.new') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>{{ t('budget_create_first_budget', default='Create Your First Budget') }}
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h6 class="mb-3">{{ t('budget_quick_actions', default='Quick Actions') }}</h6>
+                    <a href="{{ url_for('budget.new') }}" class="btn btn-primary me-2">
+                        <i class="fas fa-plus me-1"></i>{{ t('budget_create_budget', default='Create Budget') }}
+                    </a>
+                    <a href="{{ url_for('budget.export_pdf') }}" class="btn btn-outline-success me-2" title="{{ t('budget_export_pdf_cost', default='Export Full History PDF (2 FC)') }}">
+                        <i class="fas fa-file-pdf me-1"></i>{{ t('budget_export_history_pdf', default='Export History PDF') }}
+                    </a>
+                    <a href="{{ url_for('budget.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-chart-pie me-1"></i>{{ t('budget_view_dashboard', default='View Dashboard') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

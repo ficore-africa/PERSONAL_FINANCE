@@ -1,0 +1,207 @@
+<!-- Example of an offline-capable form for FiCore Africa -->
+<!-- This template shows how to make forms work offline -->
+
+<form id="billForm" 
+      action="/bills/add" 
+      method="POST" 
+      data-offline-capable="true"
+      data-action-type="save_bill"
+      data-offline-autosave="true"
+      data-autosave-delay="3000"
+      data-reset-after-submit="true"
+      data-reset-after-offline="false">
+    
+    <!-- Form will show messages here -->
+    
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="billTitle" class="form-label">
+                {{ t('bill_title', default='Bill Title') | e }} <span class="text-danger">*</span>
+            </label>
+            <input type="text" 
+                   class="form-control" 
+                   id="billTitle" 
+                   name="title" 
+                   required
+                   placeholder="{{ t('bill_title_placeholder', default='Enter bill title') | e }}">
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <label for="billAmount" class="form-label">
+                {{ t('bill_amount', default='Amount') | e }} <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+                <span class="input-group-text">₦</span>
+                <input type="number" 
+                       class="form-control" 
+                       id="billAmount" 
+                       name="amount" 
+                       step="0.01" 
+                       min="0" 
+                       required
+                       placeholder="0.00">
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="billDueDate" class="form-label">
+                {{ t('bill_due_date', default='Due Date') | e }} <span class="text-danger">*</span>
+            </label>
+            <input type="date" 
+                   class="form-control" 
+                   id="billDueDate" 
+                   name="due_date" 
+                   required>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <label for="billCategory" class="form-label">
+                {{ t('bill_category', default='Category') | e }}
+            </label>
+            <select class="form-select" id="billCategory" name="category">
+                <option value="Utilities">{{ t('category_utilities', default='Utilities') | e }}</option>
+                <option value="Rent">{{ t('category_rent', default='Rent') | e }}</option>
+                <option value="Food">{{ t('category_food', default='Food') | e }}</option>
+                <option value="Transportation">{{ t('category_transportation', default='Transportation') | e }}</option>
+                <option value="Healthcare">{{ t('category_healthcare', default='Healthcare') | e }}</option>
+                <option value="Entertainment">{{ t('category_entertainment', default='Entertainment') | e }}</option>
+                <option value="Other">{{ t('category_other', default='Other') | e }}</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="mb-3">
+        <label for="billDescription" class="form-label">
+            {{ t('bill_description', default='Description') | e }}
+        </label>
+        <textarea class="form-control" 
+                  id="billDescription" 
+                  name="description" 
+                  rows="3"
+                  placeholder="{{ t('bill_description_placeholder', default='Optional description or notes') | e }}"></textarea>
+    </div>
+    
+    <div class="mb-3">
+        <div class="form-check">
+            <input class="form-check-input" 
+                   type="checkbox" 
+                   id="billRecurring" 
+                   name="recurring" 
+                   value="true">
+            <label class="form-check-label" for="billRecurring">
+                {{ t('bill_recurring', default='This is a recurring bill') | e }}
+            </label>
+        </div>
+    </div>
+    
+    <!-- Offline status indicators -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <small class="text-muted">
+            <i class="bi bi-wifi" id="connectionIcon"></i>
+            <span id="connectionStatus">{{ t('status_online', default='Online') | e }}</span>
+        </small>
+        
+        <!-- Auto-save indicator -->
+        <div class="autosave-indicator" style="display: none;">
+            <small class="text-success">
+                <i class="bi bi-check-circle"></i>
+                {{ t('autosaved', default='Auto-saved') | e }}
+            </small>
+        </div>
+    </div>
+    
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="button" 
+                class="btn btn-outline-secondary me-md-2" 
+                onclick="document.getElementById('billForm').reset()">
+            {{ t('form_clear', default='Clear') | e }}
+        </button>
+        
+        <button type="submit" 
+                class="btn btn-primary"
+                data-online-text="{{ t('form_save', default='Save Bill') | e }}"
+                data-offline-text="{{ t('form_save_offline', default='Save Offline') | e }}">
+            {{ t('form_save', default='Save Bill') | e }}
+        </button>
+    </div>
+</form>
+
+<!-- Additional offline form styles -->
+<style>
+.autosave-indicator {
+    position: absolute;
+    top: -30px;
+    right: 0;
+    background: rgba(40, 167, 69, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.form-message {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-message i {
+    font-size: 1.1rem;
+}
+
+.field-error {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.is-invalid {
+    border-color: #dc3545;
+}
+
+.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Spinning animation for loading states */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+</style>
+
+<!-- JavaScript for connection status updates -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const connectionIcon = document.getElementById('connectionIcon');
+    const connectionStatus = document.getElementById('connectionStatus');
+    
+    function updateConnectionStatus() {
+        if (navigator.onLine) {
+            connectionIcon.className = 'bi bi-wifi';
+            connectionStatus.textContent = '{{ t("status_online", default="Online") | e }}';
+            connectionStatus.parentElement.className = 'text-success';
+        } else {
+            connectionIcon.className = 'bi bi-wifi-off';
+            connectionStatus.textContent = '{{ t("status_offline", default="Offline") | e }}';
+            connectionStatus.parentElement.className = 'text-warning';
+        }
+    }
+    
+    // Initial status
+    updateConnectionStatus();
+    
+    // Listen for connection changes
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+});
+</script>

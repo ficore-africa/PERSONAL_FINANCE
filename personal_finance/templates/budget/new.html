@@ -1,0 +1,826 @@
+{% extends "base.html" %}
+{% block title %}{{ t('budget_create_budget', default='Create Budget') }}{% endblock %}
+{% block content %}
+<!-- Add CSRF meta tag for AJAX submissions -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
+<div class="container mt-4">
+    {% set tool_name = 'budget_create_budget' %}
+    {% set tool_icon = 'fa-plus-circle' %}
+    {% set subtitle = t('budget_create_description', default='Plan your monthly income and expenses to achieve your financial goals') %}
+    {% include 'tool_header.html' %}
+
+    <!-- Navigation Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('budget.index') }}">{{ t('budget_title', default='Budget Planner') }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ t('budget_create_budget', default='Create Budget') }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <form method="POST" action="{{ url_for('budget.new') }}" id="budgetForm" class="validate-form">
+                {{ form.csrf_token }} <!-- CSRF token included -->
+                <input type="hidden" name="action" value="create_budget">
+
+                <!-- Budget Name -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-tag me-2"></i>{{ t('budget_name', default='Budget Name') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="{{ form.budget_name.id }}" class="form-label">{{ t('budget_name', default='Budget Name') }} {{ t('budget_optional', default='(Optional)') }}</label>
+                            {{ form.budget_name(class="form-control", type="text", maxlength="100", placeholder=t('budget_name_placeholder', default='e.g., October Survival Plan 💪, Wedding Budget 💒, Side Hustle Tracker 🚀'), value=form.budget_name.data or '') }}
+                            {% if form.budget_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.budget_name.errors %}
+                                        {{ t(error, default=error) }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ t('budget_name_help', default='Give your budget a creative, personal name for easy identification. Emojis are welcome! 😊') }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Income Items -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>{{ t('budget_income_sources', default='Income Sources') }}</h5>
+                        <button type="button" class="btn btn-light btn-sm add-income-item">
+                            <i class="fas fa-plus me-1"></i>{{ t('budget_add_income', default='Add Income') }}
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="income-items-container">
+                            {% for item in form.income_items.entries %}
+                                <div class="income-item-entry row mb-3 border-bottom pb-3" data-index="{{ loop.index0 }}">
+                                    <div class="col-md-4">
+                                        <label for="{{ item.form.name.id }}" class="form-label">{{ t('budget_item_name', default='Income Source') }}</label>
+                                        {{ item.form.name(class="form-control", type="text", maxlength="100", placeholder=t('budget_income_placeholder', default='e.g., Salary, Freelance'), value=item.form.name.data or '') }}
+                                        {% if item.form.name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.name.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="{{ item.form.amount.id }}" class="form-label">{{ t('budget_amount', default='Amount') }}</label>
+                                        {{ item.form.amount(class="form-control income-input", type="number", min="0", max="10000000000", step="0.01", placeholder="500000.00", value=item.form.amount.data or '') }}
+                                        {% if item.form.amount.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.amount.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="{{ item.form.note.id }}" class="form-label">{{ t('budget_note', default='Note') }} {{ t('budget_optional', default='(Optional)') }}</label>
+                                        {{ item.form.note(class="form-control", type="text", maxlength="200", placeholder=t('budget_note_placeholder', default='Additional details'), value=item.form.note.data or '') }}
+                                        {% if item.form.note.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.note.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-end">
+                                        <button type="button" class="btn btn-danger btn-sm remove-income-item">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if not form.income_items.entries %}
+                            <div class="text-muted text-center py-3">
+                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                <p>{{ t('budget_no_income_items', default='No income sources added yet. Click "Add Income" to get started.') }}</p>
+                            </div>
+                        {% endif %}
+                        {% if form.income_items.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.income_items.errors %}
+                                    {{ t(error, default=error) }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Expense Items -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>{{ t('budget_expenses', default='Expenses') }}</h5>
+                        <button type="button" class="btn btn-light btn-sm add-expense-item">
+                            <i class="fas fa-plus me-1"></i>{{ t('budget_add_expense', default='Add Expense') }}
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="expense-items-container">
+                            {% for item in form.expense_items.entries %}
+                                <div class="expense-item-entry row mb-3 border-bottom pb-3" data-index="{{ loop.index0 }}">
+                                    <div class="col-md-4">
+                                        <label for="{{ item.form.name.id }}" class="form-label">{{ t('budget_item_name', default='Expense Name') }}</label>
+                                        {{ item.form.name(class="form-control", type="text", maxlength="100", placeholder=t('budget_expense_placeholder', default='e.g., Rent, Food, Transport'), value=item.form.name.data or '') }}
+                                        {% if item.form.name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.name.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="{{ item.form.amount.id }}" class="form-label">{{ t('budget_amount', default='Amount') }}</label>
+                                        {{ item.form.amount(class="form-control expense-input", type="number", min="0", max="10000000000", step="0.01", placeholder="50000.00", value=item.form.amount.data or '') }}
+                                        {% if item.form.amount.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.amount.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="{{ item.form.note.id }}" class="form-label">{{ t('budget_note', default='Note') }} {{ t('budget_optional', default='(Optional)') }}</label>
+                                        {{ item.form.note(class="form-control", type="text", maxlength="200", placeholder=t('budget_note_placeholder', default='Additional details'), value=item.form.note.data or '') }}
+                                        {% if item.form.note.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.note.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-end">
+                                        <button type="button" class="btn btn-danger btn-sm remove-expense-item">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if not form.expense_items.entries %}
+                            <div class="text-muted text-center py-3">
+                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                <p>{{ t('budget_no_expense_items', default='No expenses added yet. Click "Add Expense" to get started.') }}</p>
+                            </div>
+                        {% endif %}
+                        {% if form.expense_items.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.expense_items.errors %}
+                                    {{ t(error, default=error) }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Investment Items -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>{{ t('budget_investments', default='Investments') }}</h5>
+                        <button type="button" class="btn btn-light btn-sm add-investment-item">
+                            <i class="fas fa-plus me-1"></i>{{ t('budget_add_investment', default='Add Investment') }}
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="investment-items-container">
+                            {% for item in form.investment_items.entries %}
+                                <div class="investment-item-entry row mb-3 border-bottom pb-3" data-index="{{ loop.index0 }}">
+                                    <div class="col-md-4">
+                                        <label for="{{ item.form.name.id }}" class="form-label">{{ t('budget_item_name', default='Investment Name') }}</label>
+                                        {{ item.form.name(class="form-control", type="text", maxlength="100", placeholder=t('budget_investment_placeholder', default='e.g., Stocks, Bonds, Crypto'), value=item.form.name.data or '') }}
+                                        {% if item.form.name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.name.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="{{ item.form.amount.id }}" class="form-label">{{ t('budget_amount', default='Amount') }}</label>
+                                        {{ item.form.amount(class="form-control investment-input", type="number", min="0", max="10000000000", step="0.01", placeholder="100000.00", value=item.form.amount.data or '') }}
+                                        {% if item.form.amount.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.amount.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="{{ item.form.note.id }}" class="form-label">{{ t('budget_note', default='Note') }} {{ t('budget_optional', default='(Optional)') }}</label>
+                                        {{ item.form.note(class="form-control", type="text", maxlength="200", placeholder=t('budget_note_placeholder', default='Additional details'), value=item.form.note.data or '') }}
+                                        {% if item.form.note.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.note.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-end">
+                                        <button type="button" class="btn btn-danger btn-sm remove-investment-item">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if not form.investment_items.entries %}
+                            <div class="text-muted text-center py-3">
+                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                <p>{{ t('budget_no_investment_items', default='No investments added yet. Click "Add Investment" to get started.') }}</p>
+                            </div>
+                        {% endif %}
+                        {% if form.investment_items.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.investment_items.errors %}
+                                    {{ t(error, default=error) }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Savings Items -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-piggy-bank me-2"></i>{{ t('budget_savings', default='Savings') }}</h5>
+                        <button type="button" class="btn btn-light btn-sm add-savings-item">
+                            <i class="fas fa-plus me-1"></i>{{ t('budget_add_savings', default='Add Savings') }}
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="savings-items-container">
+                            {% for item in form.savings_items.entries %}
+                                <div class="savings-item-entry row mb-3 border-bottom pb-3" data-index="{{ loop.index0 }}">
+                                    <div class="col-md-4">
+                                        <label for="{{ item.form.name.id }}" class="form-label">{{ t('budget_item_name', default='Savings Goal') }}</label>
+                                        {{ item.form.name(class="form-control", type="text", maxlength="100", placeholder=t('budget_savings_placeholder', default='e.g., Emergency Fund, Vacation'), value=item.form.name.data or '') }}
+                                        {% if item.form.name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.name.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="{{ item.form.amount.id }}" class="form-label">{{ t('budget_amount', default='Amount') }}</label>
+                                        {{ item.form.amount(class="form-control savings-input", type="number", min="0", max="10000000000", step="0.01", placeholder="50000.00", value=item.form.amount.data or '') }}
+                                        {% if item.form.amount.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.amount.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="{{ item.form.note.id }}" class="form-label">{{ t('budget_note', default='Note') }} {{ t('budget_optional', default='(Optional)') }}</label>
+                                        {{ item.form.note(class="form-control", type="text", maxlength="200", placeholder=t('budget_note_placeholder', default='Additional details'), value=item.form.note.data or '') }}
+                                        {% if item.form.note.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.note.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-end">
+                                        <button type="button" class="btn btn-danger btn-sm remove-savings-item">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if not form.savings_items.entries %}
+                            <div class="text-muted text-center py-3">
+                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                <p>{{ t('budget_no_savings_items', default='No savings goals added yet. Click "Add Savings" to get started.') }}</p>
+                            </div>
+                        {% endif %}
+                        {% if form.savings_items.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.savings_items.errors %}
+                                    {{ t(error, default=error) }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Supports & Dependents Items -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>{{ t('budget_supports_dependents', default='Supports & Dependents') }}</h5>
+                        <button type="button" class="btn btn-light btn-sm add-dependents-item">
+                            <i class="fas fa-plus me-1"></i>{{ t('budget_add_dependents', default='Add Support') }}
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="dependents-items-container">
+                            {% for item in form.dependents_items.entries %}
+                                <div class="dependents-item-entry row mb-3 border-bottom pb-3" data-index="{{ loop.index0 }}">
+                                    <div class="col-md-4">
+                                        <label for="{{ item.form.name.id }}" class="form-label">{{ t('budget_item_name', default='Support Name') }}</label>
+                                        {{ item.form.name(class="form-control", type="text", maxlength="100", placeholder=t('budget_dependents_placeholder', default='e.g., Parents Support, Wedding Fund, Donations'), value=item.form.name.data or '') }}
+                                        {% if item.form.name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.name.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="{{ item.form.amount.id }}" class="form-label">{{ t('budget_amount', default='Amount') }}</label>
+                                        {{ item.form.amount(class="form-control dependents-input", type="number", min="0", max="10000000000", step="0.01", placeholder="50000.00", value=item.form.amount.data or '') }}
+                                        {% if item.form.amount.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.amount.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="{{ item.form.note.id }}" class="form-label">{{ t('budget_note', default='Note') }} {{ t('budget_optional', default='(Optional)') }}</label>
+                                        {{ item.form.note(class="form-control", type="text", maxlength="200", placeholder=t('budget_note_placeholder', default='Additional details'), value=item.form.note.data or '') }}
+                                        {% if item.form.note.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item.form.note.errors %}
+                                                    {{ t(error, default=error) }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-end">
+                                        <button type="button" class="btn btn-danger btn-sm remove-dependents-item">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if not form.dependents_items.entries %}
+                            <div class="text-muted text-center py-3">
+                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                <p>{{ t('budget_no_dependents_items', default='No supports or dependents added yet. Click "Add Support" to get started.') }}</p>
+                            </div>
+                        {% endif %}
+                        {% if form.dependents_items.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.dependents_items.errors %}
+                                    {{ t(error, default=error) }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Real-Time Balance Display -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h6>{{ t('budget_balance_summary', default='Balance Summary') }}</h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <p><strong>{{ t('budget_total_income', default='Total Income') }}:</strong></p>
+                                <p class="text-primary fs-5" id="total-income">0.00</p>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>{{ t('budget_total_expenses', default='Total Expenses') }}:</strong></p>
+                                <p class="text-warning fs-5" id="total-expenses">0.00</p>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>{{ t('budget_total_investments', default='Total Investments') }}:</strong></p>
+                                <p class="text-info fs-5" id="total-investments">0.00</p>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>{{ t('budget_total_savings', default='Total Savings') }}:</strong></p>
+                                <p class="text-success fs-5" id="total-savings">0.00</p>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>{{ t('budget_total_dependents', default='Total Supports') }}:</strong></p>
+                                <p class="text-warning fs-5" id="total-dependents">0.00</p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="text-center">
+                            <p><strong>{{ t('budget_surplus_deficit', default='Surplus/Deficit') }}:</strong></p>
+                            <p class="fs-4 fw-bold" id="surplus-deficit">0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('budget.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>{{ t('general_back', default='Back') }}
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-calculator me-2"></i>{{ t('budget_calculate_budget', default='Calculate Budget') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Tips Sidebar -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>{{ t('budget_tips', default='Tips') }}</h6>
+                </div>
+                <div class="card-body">
+                    {% if tips %}
+                        <ul class="list-unstyled">
+                            {% for tip in tips %}
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>{{ t(tip, default=tip) }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>{{ t('budget_tip_track_expenses', default='Track your expenses daily to stay within budget') }}</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>{{ t('budget_tip_ajo_savings', default='Contribute to ajo savings for financial discipline') }}</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>{{ t('budget_tip_data_subscriptions', default='Optimize data subscriptions to reduce costs') }}</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>{{ t('budget_tip_plan_dependents', default='Plan for dependents\' expenses in advance') }}</li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            {% if activities %}
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-clock me-2"></i>{{ t('general_recent_activity', default='Recent Activity') }}</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            {% for activity in activities[:5] %}
+                                <div class="list-group-item border-0 px-0">
+                                    <small class="text-muted">{{ activity.timestamp | format_datetime }}</small>
+                                    <div>{{ activity.description }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('budgetForm');
+    
+    // Item counters for dynamic form fields
+    let incomeIndex = {{ form.income_items.entries|length }};
+    let expenseIndex = {{ form.expense_items.entries|length }};
+    let investmentIndex = {{ form.investment_items.entries|length }};
+    let savingsIndex = {{ form.savings_items.entries|length }};
+    let dependentsIndex = {{ form.dependents_items.entries|length if form.dependents_items.entries else 0 }};
+
+    // Templates for new items
+    function createIncomeItemTemplate(index) {
+        return `
+            <div class="income-item-entry row mb-3 border-bottom pb-3" data-index="${index}">
+                <div class="col-md-4">
+                    <label for="income_items-${index}-name" class="form-label">{{ t('budget_item_name', default='Income Source') }}</label>
+                    <input type="text" class="form-control" name="income_items-${index}-name" id="income_items-${index}-name" maxlength="100" placeholder="{{ t('budget_income_placeholder', default='e.g., Salary, Freelance') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="income_items-${index}-amount" class="form-label">{{ t('budget_amount', default='Amount') }}</label>
+                    <input type="number" class="form-control income-input" name="income_items-${index}-amount" id="income_items-${index}-amount" min="0" max="10000000000" step="0.01" placeholder="500000.00">
+                </div>
+                <div class="col-md-3">
+                    <label for="income_items-${index}-note" class="form-label">{{ t('budget_note', default='Note') }} {{ t('budget_optional', default='(Optional)') }}</label>
+                    <input type="text" class="form-control" name="income_items-${index}-note" id="income_items-${index}-note" maxlength="200" placeholder="{{ t('budget_note_placeholder', default='Additional details') }}">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-sm remove-income-item">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    function createExpenseItemTemplate(index) {
+        return `
+            <div class="expense-item-entry row mb-3 border-bottom pb-3" data-index="${index}">
+                <div class="col-md-4">
+                    <label for="expense_items-${index}-name" class="form-label">{{ t('budget_item_name', default='Expense Name') }}</label>
+                    <input type="text" class="form-control" name="expense_items-${index}-name" id="expense_items-${index}-name" maxlength="100" placeholder="{{ t('budget_expense_placeholder', default='e.g., Rent, Food, Transport') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="expense_items-${index}-amount" class="form-label">{{ t('budget_amount', default='Amount') }}</label>
+                    <input type="number" class="form-control expense-input" name="expense_items-${index}-amount" id="expense_items-${index}-amount" min="0" max="10000000000" step="0.01" placeholder="50000.00">
+                </div>
+                <div class="col-md-3">
+                    <label for="expense_items-${index}-note" class="form-label">{{ t('budget_note', default='Note') }} {{ t('budget_optional', default='(Optional)') }}</label>
+                    <input type="text" class="form-control" name="expense_items-${index}-note" id="expense_items-${index}-note" maxlength="200" placeholder="{{ t('budget_note_placeholder', default='Additional details') }}">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-sm remove-expense-item">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    function createInvestmentItemTemplate(index) {
+        return `
+            <div class="investment-item-entry row mb-3 border-bottom pb-3" data-index="${index}">
+                <div class="col-md-4">
+                    <label for="investment_items-${index}-name" class="form-label">{{ t('budget_item_name', default='Investment Name') }}</label>
+                    <input type="text" class="form-control" name="investment_items-${index}-name" id="investment_items-${index}-name" maxlength="100" placeholder="{{ t('budget_investment_placeholder', default='e.g., Stocks, Bonds, Crypto') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="investment_items-${index}-amount" class="form-label">{{ t('budget_amount', default='Amount') }}</label>
+                    <input type="number" class="form-control investment-input" name="investment_items-${index}-amount" id="investment_items-${index}-amount" min="0" max="10000000000" step="0.01" placeholder="100000.00">
+                </div>
+                <div class="col-md-3">
+                    <label for="investment_items-${index}-note" class="form-label">{{ t('budget_note', default='Note') }} {{ t('budget_optional', default='(Optional)') }}</label>
+                    <input type="text" class="form-control" name="investment_items-${index}-note" id="investment_items-${index}-note" maxlength="200" placeholder="{{ t('budget_note_placeholder', default='Additional details') }}">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-sm remove-investment-item">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    function createSavingsItemTemplate(index) {
+        return `
+            <div class="savings-item-entry row mb-3 border-bottom pb-3" data-index="${index}">
+                <div class="col-md-4">
+                    <label for="savings_items-${index}-name" class="form-label">{{ t('budget_item_name', default='Savings Goal') }}</label>
+                    <input type="text" class="form-control" name="savings_items-${index}-name" id="savings_items-${index}-name" maxlength="100" placeholder="{{ t('budget_savings_placeholder', default='e.g., Emergency Fund, Vacation') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="savings_items-${index}-amount" class="form-label">{{ t('budget_amount', default='Amount') }}</label>
+                    <input type="number" class="form-control savings-input" name="savings_items-${index}-amount" id="savings_items-${index}-amount" min="0" max="10000000000" step="0.01" placeholder="50000.00">
+                </div>
+                <div class="col-md-3">
+                    <label for="savings_items-${index}-note" class="form-label">{{ t('budget_note', default='Note') }} {{ t('budget_optional', default='(Optional)') }}</label>
+                    <input type="text" class="form-control" name="savings_items-${index}-note" id="savings_items-${index}-note" maxlength="200" placeholder="{{ t('budget_note_placeholder', default='Additional details') }}">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-sm remove-savings-item">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    function createDependentsItemTemplate(index) {
+        return `
+            <div class="dependents-item-entry row mb-3 border-bottom pb-3" data-index="${index}">
+                <div class="col-md-4">
+                    <label for="dependents_items-${index}-name" class="form-label">{{ t('budget_item_name', default='Support Name') }}</label>
+                    <input type="text" class="form-control" name="dependents_items-${index}-name" id="dependents_items-${index}-name" maxlength="100" placeholder="{{ t('budget_dependents_placeholder', default='e.g., Parents Support, Wedding Fund, Donations') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="dependents_items-${index}-amount" class="form-label">{{ t('budget_amount', default='Amount') }}</label>
+                    <input type="number" class="form-control dependents-input" name="dependents_items-${index}-amount" id="dependents_items-${index}-amount" min="0" max="10000000000" step="0.01" placeholder="50000.00">
+                </div>
+                <div class="col-md-3">
+                    <label for="dependents_items-${index}-note" class="form-label">{{ t('budget_note', default='Note') }} {{ t('budget_optional', default='(Optional)') }}</label>
+                    <input type="text" class="form-control" name="dependents_items-${index}-note" id="dependents_items-${index}-note" maxlength="200" placeholder="{{ t('budget_note_placeholder', default='Additional details') }}">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-sm remove-dependents-item">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Add item event listeners
+    document.querySelector('.add-income-item').addEventListener('click', function() {
+        if (incomeIndex < 20) {
+            document.getElementById('income-items-container').insertAdjacentHTML('beforeend', createIncomeItemTemplate(incomeIndex));
+            incomeIndex++;
+            attachEventListeners();
+            updateBalance();
+        } else {
+            alert('{{ t('budget_max_items', default='Maximum of 20 items allowed per category') }}');
+        }
+    });
+
+    document.querySelector('.add-expense-item').addEventListener('click', function() {
+        if (expenseIndex < 20) {
+            document.getElementById('expense-items-container').insertAdjacentHTML('beforeend', createExpenseItemTemplate(expenseIndex));
+            expenseIndex++;
+            attachEventListeners();
+            updateBalance();
+        } else {
+            alert('{{ t('budget_max_items', default='Maximum of 20 items allowed per category') }}');
+        }
+    });
+
+    document.querySelector('.add-investment-item').addEventListener('click', function() {
+        if (investmentIndex < 20) {
+            document.getElementById('investment-items-container').insertAdjacentHTML('beforeend', createInvestmentItemTemplate(investmentIndex));
+            investmentIndex++;
+            attachEventListeners();
+            updateBalance();
+        } else {
+            alert('{{ t('budget_max_items', default='Maximum of 20 items allowed per category') }}');
+        }
+    });
+
+    document.querySelector('.add-savings-item').addEventListener('click', function() {
+        if (savingsIndex < 20) {
+            document.getElementById('savings-items-container').insertAdjacentHTML('beforeend', createSavingsItemTemplate(savingsIndex));
+            savingsIndex++;
+            attachEventListeners();
+            updateBalance();
+        } else {
+            alert('{{ t('budget_max_items', default='Maximum of 20 items allowed per category') }}');
+        }
+    });
+
+    document.querySelector('.add-dependents-item').addEventListener('click', function() {
+        if (dependentsIndex < 20) {
+            document.getElementById('dependents-items-container').insertAdjacentHTML('beforeend', createDependentsItemTemplate(dependentsIndex));
+            dependentsIndex++;
+            attachEventListeners();
+            updateBalance();
+        } else {
+            alert('{{ t('budget_max_items', default='Maximum of 20 items allowed per category') }}');
+        }
+    });
+
+    // Attach event listeners to remove buttons and inputs
+    function attachEventListeners() {
+        // Remove item event listeners
+        document.querySelectorAll('.remove-income-item').forEach(button => {
+            button.removeEventListener('click', removeItemHandler);
+            button.addEventListener('click', removeItemHandler);
+        });
+        
+        document.querySelectorAll('.remove-expense-item').forEach(button => {
+            button.removeEventListener('click', removeItemHandler);
+            button.addEventListener('click', removeItemHandler);
+        });
+        
+        document.querySelectorAll('.remove-investment-item').forEach(button => {
+            button.removeEventListener('click', removeItemHandler);
+            button.addEventListener('click', removeItemHandler);
+        });
+        
+        document.querySelectorAll('.remove-savings-item').forEach(button => {
+            button.removeEventListener('click', removeItemHandler);
+            button.addEventListener('click', removeItemHandler);
+        });
+        
+        document.querySelectorAll('.remove-dependents-item').forEach(button => {
+            button.removeEventListener('click', removeItemHandler);
+            button.addEventListener('click', removeItemHandler);
+        });
+
+        // Balance update listeners
+        document.querySelectorAll('.income-input, .expense-input, .investment-input, .savings-input, .dependents-input').forEach(input => {
+            input.removeEventListener('input', updateBalance);
+            input.addEventListener('input', updateBalance);
+        });
+    }
+
+    function removeItemHandler() {
+        const entry = this.closest('.income-item-entry, .expense-item-entry, .investment-item-entry, .savings-item-entry');
+        entry.remove();
+        updateBalance();
+    }
+
+    // Real-time balance calculation
+    function updateBalance() {
+        let totalIncome = 0;
+        let totalExpenses = 0;
+        let totalInvestments = 0;
+        let totalSavings = 0;
+        let totalDependents = 0;
+
+        // Calculate totals
+        document.querySelectorAll('.income-input').forEach(input => {
+            totalIncome += parseFloat(input.value) || 0;
+        });
+
+        document.querySelectorAll('.expense-input').forEach(input => {
+            totalExpenses += parseFloat(input.value) || 0;
+        });
+
+        document.querySelectorAll('.investment-input').forEach(input => {
+            totalInvestments += parseFloat(input.value) || 0;
+        });
+
+        document.querySelectorAll('.savings-input').forEach(input => {
+            totalSavings += parseFloat(input.value) || 0;
+        });
+
+        document.querySelectorAll('.dependents-input').forEach(input => {
+            totalDependents += parseFloat(input.value) || 0;
+        });
+
+        const surplusDeficit = totalIncome - totalExpenses - totalInvestments - totalSavings - totalDependents;
+
+        // Update display
+        document.getElementById('total-income').textContent = formatCurrency(totalIncome);
+        document.getElementById('total-expenses').textContent = formatCurrency(totalExpenses);
+        document.getElementById('total-investments').textContent = formatCurrency(totalInvestments);
+        document.getElementById('total-savings').textContent = formatCurrency(totalSavings);
+        document.getElementById('total-dependents').textContent = formatCurrency(totalDependents);
+        document.getElementById('surplus-deficit').textContent = formatCurrency(surplusDeficit);
+        
+        // Color-code surplus/deficit
+        const surplusDeficitElement = document.getElementById('surplus-deficit');
+        if (surplusDeficit >= 0) {
+            surplusDeficitElement.className = 'fs-4 fw-bold text-success';
+        } else {
+            surplusDeficitElement.className = 'fs-4 fw-bold text-danger';
+        }
+    }
+
+    function formatCurrency(value) {
+        return value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Form submission with AJAX support
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                const firstInvalid = form.querySelector(':invalid');
+                if (firstInvalid) {
+                    firstInvalid.focus();
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+
+            // Validate unique item names within each category
+            const categories = ['income', 'expense', 'investment', 'savings'];
+            for (const category of categories) {
+                const names = [];
+                document.querySelectorAll(`input[name^="${category}_items"][name$="-name"]`).forEach(input => {
+                    if (input.value.trim()) {
+                        names.push(input.value.trim().toLowerCase());
+                    }
+                });
+                if (names.length !== new Set(names).size) {
+                    alert(`{{ t('budget_duplicate_item_names', default='Item names must be unique within each category') }}: ${category}`);
+                    return;
+                }
+            }
+
+            const formData = new FormData(form);
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+            fetch('{{ url_for("budget.new") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json().then(data => ({ status: response.status, data })))
+            .then(({ status, data }) => {
+                if (status === 200 && data.success) {
+                    window.location.href = '{{ url_for("budget.dashboard") }}';
+                } else {
+                    alert(data.message || '{{ t("budget_form_invalid", default="Invalid form data. Please check your inputs.") }}');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('{{ t("budget_submission_error", default="Error submitting budget. Please try again.") }}');
+            });
+        });
+    }
+
+    // Initial setup
+    attachEventListeners();
+    updateBalance();
+});
+</script>
+{% endblock %}

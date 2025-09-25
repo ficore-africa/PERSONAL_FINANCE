@@ -1,0 +1,760 @@
+{% extends "base.html" %}
+{% block title %}{{ t('dashboard_title', default='Dashboard') }}{% endblock %}
+
+{% block extra_head %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<style>
+.dashboard-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: none;
+    border-radius: 12px;
+}
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+.metric-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+}
+.metric-card.income {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+.metric-card.expense {
+    background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+}
+.metric-card.budget {
+    background: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%);
+}
+.progress-ring {
+    width: 80px;
+    height: 80px;
+}
+.progress-ring circle {
+    fill: transparent;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+}
+.recent-activity-item {
+    border-left: 4px solid #007bff;
+    padding-left: 15px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+.recent-activity-item:hover {
+    background-color: rgba(0,123,255,0.05);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-left: -10px;
+}
+.insight-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+}
+</style>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.dashboard-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: none;
+    border-radius: 12px;
+}
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+.metric-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+}
+.metric-card.income {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+.metric-card.expense {
+    background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+}
+.metric-card.budget {
+    background: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%);
+}
+.progress-ring {
+    width: 80px;
+    height: 80px;
+}
+.progress-ring circle {
+    fill: transparent;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+}
+.recent-activity-item {
+    border-left: 4px solid #007bff;
+    padding-left: 15px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+.recent-activity-item:hover {
+    background-color: rgba(0,123,255,0.05);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-left: -10px;
+}
+.insight-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('general_bp.home') }}">{{ t('general_home', default='Home') }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ t('dashboard_title', default='Dashboard') }}</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">{{ t('dashboard_title', default='Dashboard') }}</h2>
+            <p class="text-muted mb-0">{{ t('dashboard_welcome_message', default='Welcome back! Here\'s your financial overview.') }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
+                <i class="bi bi-arrow-clockwise me-1"></i>{{ t('general_refresh', default='Refresh') }}
+            </button>
+        </div>
+    </div>
+
+    {% if current_user.is_authenticated %}
+        {% if current_user.role == 'admin' %}
+            <div class="alert alert-info mb-4">
+                <i class="bi bi-shield-check me-2"></i>{{ t('admin_view_all_data', default='You are viewing all users\' data as an admin.') }}
+            </div>
+        {% endif %}
+
+        <!-- Financial Overview Cards -->
+        {% if personal_finance_summary.has_personal_data %}
+        <div class="row g-4 mb-4">
+            <!-- Budget Progress Card -->
+            {% if dashboard_data.budget_progress %}
+            <div class="col-lg-3 col-md-6">
+                <div class="card dashboard-card metric-card budget h-100">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="card-title mb-1">{{ t('budget_progress', default='Budget Progress') }}</h6>
+                                <small class="opacity-75">{{ t('dashboard_current_month', default='Current Month') }}</small>
+                            </div>
+                            <i class="bi bi-pie-chart-fill fa-2x opacity-75"></i>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="h4 mb-0">{{ dashboard_data.budget_progress.expense_percentage | round(1) }}%</div>
+                                <small>{{ t('budget_used', default='Used') }}</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="h5 mb-0">{{ dashboard_data.budget_progress.remaining_budget | format_currency }}</div>
+                                <small>{{ t('budget_remaining', default='Remaining') }}</small>
+                            </div>
+                        </div>
+                        {% if dashboard_data.budget_progress.is_over_budget %}
+                        <div class="mt-2">
+                            <small class="badge bg-warning">{{ t('budget_over_budget', default='Over Budget') }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Income Card -->
+            {% if dashboard_data.transaction_summary.total_income > 0 %}
+            <div class="col-lg-3 col-md-6">
+                <div class="card dashboard-card metric-card income h-100">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="card-title mb-1">{{ t('dashboard_total_income', default='Total Income') }}</h6>
+                                <small class="opacity-75">{{ t('dashboard_this_month', default='This Month') }}</small>
+                            </div>
+                            <i class="bi bi-arrow-up-circle-fill fa-2x opacity-75"></i>
+                        </div>
+                        <div class="h3 mb-2">{{ dashboard_data.transaction_summary.total_income | format_currency }}</div>
+                        <small>{{ dashboard_data.transaction_summary.by_type.income.total_count if dashboard_data.transaction_summary.by_type.income else 0 }} {{ t('dashboard_transactions', default='transactions') }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Expenses Card -->
+            {% if dashboard_data.transaction_summary.total_expenses > 0 %}
+            <div class="col-lg-3 col-md-6">
+                <div class="card dashboard-card metric-card expense h-100">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="card-title mb-1">{{ t('dashboard_total_expenses', default='Total Expenses') }}</h6>
+                                <small class="opacity-75">{{ t('dashboard_this_month', default='This Month') }}</small>
+                            </div>
+                            <i class="bi bi-arrow-down-circle-fill fa-2x opacity-75"></i>
+                        </div>
+                        <div class="h3 mb-2">{{ dashboard_data.transaction_summary.total_expenses | format_currency }}</div>
+                        <small>{{ (dashboard_data.transaction_summary.by_type.expense.total_count if dashboard_data.transaction_summary.by_type.expense else 0) + (dashboard_data.transaction_summary.by_type.bill_payment.total_count if dashboard_data.transaction_summary.by_type.bill_payment else 0) }} {{ t('dashboard_transactions', default='transactions') }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Bills Status Card -->
+            {% if personal_finance_summary.total_bills > 0 %}
+            <div class="col-lg-3 col-md-6">
+                <div class="card dashboard-card h-100 {{ 'border-danger' if personal_finance_summary.overdue_bills > 0 else 'border-success' }}">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="card-title mb-1">{{ t('bill_status', default='Bills Status') }}</h6>
+                                <small class="text-muted">{{ t('dashboard_overview', default='Overview') }}</small>
+                            </div>
+                            <i class="bi bi-receipt-cutoff fa-2x {{ 'text-danger' if personal_finance_summary.overdue_bills > 0 else 'text-success' }}"></i>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="h5 mb-0 text-success">{{ personal_finance_summary.total_bills - personal_finance_summary.overdue_bills - personal_finance_summary.pending_bills }}</div>
+                                <small class="text-muted">{{ t('bill_paid', default='Paid') }}</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="h5 mb-0 text-warning">{{ personal_finance_summary.pending_bills }}</div>
+                                <small class="text-muted">{{ t('bill_pending', default='Pending') }}</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="h5 mb-0 text-danger">{{ personal_finance_summary.overdue_bills }}</div>
+                                <small class="text-muted">{{ t('bill_overdue', default='Overdue') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Main Dashboard Content -->
+        <div class="row g-4">
+            <!-- Recent Activity -->
+            <div class="col-lg-8">
+                <div class="card dashboard-card h-100">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clock-history me-2"></i>{{ t('dashboard_recent_activity', default='Recent Activity') }}
+                        </h5>
+                        <a href="#" class="btn btn-sm btn-outline-primary" onclick="loadMoreActivity()">{{ t('dashboard_see_all', default='See All') }}</a>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentActivityContainer">
+                            {% if dashboard_data.recent_transactions %}
+                                {% for transaction in dashboard_data.recent_transactions[:3] %}
+                                <div class="recent-activity-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-1">
+                                                <i class="bi {{ 'bi-arrow-up-circle text-success' if transaction.type == 'income' else 'bi-arrow-down-circle text-danger' }} me-2"></i>
+                                                <strong>{{ transaction.description }}</strong>
+                                                <span class="badge bg-secondary ms-2">{{ transaction.category }}</span>
+                                            </div>
+                                            <small class="text-muted">{{ transaction.timestamp | format_datetime }}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold {{ 'text-success' if transaction.type == 'income' else 'text-danger' }}">
+                                                {{ '+' if transaction.type == 'income' else '-' }}{{ transaction.amount | format_currency }}
+                                            </div>
+                                            <small class="text-muted">{{ transaction.status | title }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="bi bi-clock-history fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">{{ t('dashboard_no_recent_activity', default='No recent activity to display.') }}</p>
+                                    <p class="text-muted small">{{ t('dashboard_activity_will_appear', default='Your financial activities will appear here.') }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions & Insights -->
+            <div class="col-lg-4">
+                <!-- Smart Insights -->
+                <div class="card dashboard-card mb-4">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="mb-0">
+                            <i class="bi bi-lightbulb me-2"></i>{{ t('dashboard_smart_insights', default='Smart Insights') }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="smartInsightsContainer">
+                            <div class="text-center py-3">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">{{ t('general_loading', default='Loading...') }}</span>
+                                </div>
+                                <p class="text-muted small mt-2 mb-0">{{ t('dashboard_loading_insights', default='Loading insights...') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Transaction Entry -->
+                <div class="card dashboard-card mb-4">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="mb-0">
+                            <i class="bi bi-plus-circle me-2"></i>{{ t('dashboard_quick_transaction', default='Quick Transaction') }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="quickTransactionForm" class="row g-2">
+                            <div class="col-12">
+                                <select class="form-select form-select-sm" id="transactionType" required>
+                                    <option value="">{{ t('dashboard_select_type', default='Select Type') }}</option>
+                                    <option value="income">{{ t('dashboard_income', default='Income') }}</option>
+                                    <option value="expense">{{ t('dashboard_expense', default='Expense') }}</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <input type="number" class="form-control form-control-sm" id="transactionAmount" placeholder="{{ t('dashboard_amount', default='Amount') }}" step="0.01" min="0" required>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control form-control-sm" id="transactionCategory" placeholder="{{ t('dashboard_category', default='Category') }}" required>
+                            </div>
+                            <div class="col-12">
+                                <input type="text" class="form-control form-control-sm" id="transactionDescription" placeholder="{{ t('dashboard_description', default='Description') }}" required>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-sm w-100">
+                                    <i class="bi bi-plus me-1"></i>{{ t('dashboard_add_transaction', default='Add Transaction') }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card dashboard-card mb-4">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="mb-0">
+                            <i class="bi bi-lightning-charge me-2"></i>{{ t('general_quick_actions', default='Quick Actions') }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <a href="{{ url_for('budget.index') }}" class="btn btn-outline-primary w-100 btn-sm">
+                                    <i class="bi bi-pie-chart d-block mb-1"></i>
+                                    <small>{{ t('budget_title', default='Budget') }}</small>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{{ url_for('bill.index') }}" class="btn btn-outline-warning w-100 btn-sm">
+                                    <i class="bi bi-receipt d-block mb-1"></i>
+                                    <small>{{ t('bill_title', default='Bills') }}</small>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{{ url_for('shopping.index') }}" class="btn btn-outline-info w-100 btn-sm">
+                                    <i class="bi bi-cart d-block mb-1"></i>
+                                    <small>{{ t('shopping_title', default='Shopping') }}</small>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{{ url_for('reports.index') }}" class="btn btn-outline-success w-100 btn-sm">
+                                    <i class="bi bi-graph-up d-block mb-1"></i>
+                                    <small>{{ t('reports_title', default='Reports') }}</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Bills -->
+                {% if dashboard_data.upcoming_bills %}
+                <div class="card dashboard-card">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="mb-0">
+                            <i class="bi bi-calendar-event me-2"></i>{{ t('dashboard_upcoming_bills', default='Upcoming Bills') }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% for bill in dashboard_data.upcoming_bills %}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <div class="fw-semibold">{{ bill.bill_name }}</div>
+                                <small class="text-muted">{{ t('bill_due', default='Due') }}: {{ bill.due_date | format_date }}</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">{{ bill.amount | format_currency }}</div>
+                                <span class="badge bg-warning">{{ t('bill_pending', default='Pending') }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="text-center mt-3">
+                            <a href="{{ url_for('bill.index') }}" class="btn btn-sm btn-outline-primary">{{ t('dashboard_view_all_bills', default='View All Bills') }}</a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% else %}
+            <!-- Getting Started Section -->
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card dashboard-card text-center py-5">
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <i class="bi bi-graph-up-arrow fa-4x text-primary opacity-50"></i>
+                            </div>
+                            <h3 class="mb-3">{{ t('dashboard_welcome_personal_finance', default='Welcome to Your Financial Dashboard') }}</h3>
+                            <p class="text-muted mb-4 lead">{{ t('dashboard_no_data_message', default='Log transactions to see your insights and track your financial progress.') }}</p>
+                            
+                            <!-- Smart Insights Placeholder -->
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-4">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body text-center py-4">
+                                            <i class="bi bi-lightbulb fa-2x text-warning mb-3"></i>
+                                            <h6 class="fw-bold">{{ t('dashboard_smart_insights', default='Smart Insights') }}</h6>
+                                            <p class="text-muted small mb-0">{{ t('dashboard_insights_placeholder', default='Get personalized financial insights based on your spending patterns') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body text-center py-4">
+                                            <i class="bi bi-graph-up fa-2x text-success mb-3"></i>
+                                            <h6 class="fw-bold">{{ t('dashboard_spending_analysis', default='Spending Analysis') }}</h6>
+                                            <p class="text-muted small mb-0">{{ t('dashboard_analysis_placeholder', default='Track your spending by category and identify trends') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body text-center py-4">
+                                            <i class="bi bi-target fa-2x text-info mb-3"></i>
+                                            <h6 class="fw-bold">{{ t('dashboard_budget_tracking', default='Budget Tracking') }}</h6>
+                                            <p class="text-muted small mb-0">{{ t('dashboard_budget_placeholder', default='Monitor your budget vs actual spending in real-time') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Getting Started Actions -->
+                            <div class="alert alert-info mb-4">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>{{ t('dashboard_get_started', default='Get Started:') }}</strong>
+                                {{ t('dashboard_get_started_message', default='Mark your bills as paid, or shopping items as bought to see insights and track your financial activity.') }}
+                            </div>
+                            
+                            <div class="row g-3 justify-content-center">
+                                <div class="col-md-3 col-6">
+                                    <a href="{{ url_for('budget.index') }}" class="btn btn-primary w-100">
+                                        <i class="bi bi-pie-chart d-block mb-2 fa-2x"></i>
+                                        {{ t('budget_create_first', default='Create Budget') }}
+                                    </a>
+                                    <small class="text-muted d-block mt-2">{{ t('dashboard_budget_help', default='Set up your income and expenses') }}</small>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <a href="{{ url_for('bill.index') }}" class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-receipt d-block mb-2 fa-2x"></i>
+                                        {{ t('bill_add_first', default='Add Bills') }}
+                                    </a>
+                                    <small class="text-muted d-block mt-2">{{ t('dashboard_bills_help', default='Track and pay your bills') }}</small>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <a href="{{ url_for('shopping.index') }}" class="btn btn-outline-info w-100">
+                                        <i class="bi bi-cart d-block mb-2 fa-2x"></i>
+                                        {{ t('shopping_create_first', default='Create Shopping List') }}
+                                    </a>
+                                    <small class="text-muted d-block mt-2">{{ t('dashboard_shopping_help', default='Plan and track your purchases') }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if current_user.role == 'admin' %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card dashboard-card">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="mb-0">
+                            <i class="bi bi-shield-check me-2"></i>{{ t('general_admin_actions', default='Admin Actions') }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-warning">
+                                <i class="bi bi-speedometer me-2"></i>{{ t('admin_dashboard', default='Admin Dashboard') }}
+                            </a>
+                            <a href="{{ url_for('admin.manage_users') }}" class="btn btn-outline-warning">
+                                <i class="bi bi-people me-2"></i>{{ t('admin_manage_users', default='Manage Users') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card dashboard-card text-center py-5">
+                    <div class="card-body">
+                        <i class="bi bi-speedometer2 fa-4x text-primary mb-4"></i>
+                        <h3 class="mb-3">{{ t('dashboard_welcome_to_ficore', default='Welcome to FiCore Dashboard') }}</h3>
+                        <p class="text-muted mb-4">{{ t('dashboard_please_login', default='Please log in to view your personalized financial dashboard.') }}</p>
+                        <a href="{{ url_for('users.login') }}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>{{ t('general_login', default='Log In') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+    
+    // Load smart insights if user has data
+    {% if personal_finance_summary.has_personal_data %}
+    loadSmartInsights();
+    {% endif %}
+    
+    // Auto-refresh dashboard data every 5 minutes
+    setInterval(refreshRecentActivity, 300000);
+});
+
+function refreshDashboard() {
+    location.reload();
+}
+
+function refreshRecentActivity() {
+    fetch('{{ url_for("dashboard.api_recent_activity") }}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.recent_transactions.length > 0) {
+                updateRecentActivityDisplay(data.recent_transactions);
+            }
+        })
+        .catch(error => {
+            console.error('Error refreshing recent activity:', error);
+        });
+}
+
+function updateRecentActivityDisplay(transactions) {
+    const container = document.getElementById('recentActivityContainer');
+    if (!container) return;
+    
+    let html = '';
+    transactions.forEach(transaction => {
+        const isIncome = transaction.type === 'income';
+        const icon = isIncome ? 'bi-arrow-up-circle text-success' : 'bi-arrow-down-circle text-danger';
+        const amountClass = isIncome ? 'text-success' : 'text-danger';
+        const amountPrefix = isIncome ? '+' : '-';
+        
+        html += `
+            <div class="recent-activity-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="bi ${icon} me-2"></i>
+                            <strong>${transaction.description}</strong>
+                            <span class="badge bg-secondary ms-2">${transaction.category}</span>
+                        </div>
+                        <small class="text-muted">${transaction.formatted_date}</small>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold ${amountClass}">
+                            ${amountPrefix}${transaction.formatted_amount}
+                        </div>
+                        <small class="text-muted">${transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function loadMoreActivity() {
+    // Redirect to a dedicated transactions/activity page
+    window.location.href = '{{ url_for("reports.index") }}';
+}
+
+function loadSmartInsights() {
+    const container = document.getElementById('smartInsightsContainer');
+    if (!container) return;
+    
+    fetch('{{ url_for("summaries.smart_insights") }}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.insights && data.insights.length > 0) {
+                let html = '';
+                data.insights.slice(0, 3).forEach(insight => {
+                    const severityClass = insight.severity === 'warning' ? 'text-warning' : 
+                                        insight.severity === 'success' ? 'text-success' : 'text-info';
+                    const bgClass = insight.severity === 'warning' ? 'bg-warning-subtle' : 
+                                   insight.severity === 'success' ? 'bg-success-subtle' : 'bg-info-subtle';
+                    
+                    html += `
+                        <div class="insight-item mb-3 p-3 rounded ${bgClass}">
+                            <div class="d-flex align-items-start">
+                                <i class="bi ${insight.icon || 'bi-lightbulb'} ${severityClass} me-2 mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-semibold">${insight.title}</h6>
+                                    <p class="mb-0 small">${insight.message}</p>
+                                    ${insight.amount ? `<small class="text-muted">Amount: ${formatCurrency(insight.amount)}</small>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                if (data.insights.length > 3) {
+                    html += `
+                        <div class="text-center">
+                            <a href="{{ url_for('reports.index') }}" class="btn btn-sm btn-outline-primary">
+                                {{ t('dashboard_view_all_insights', default='View All Insights') }}
+                            </a>
+                        </div>
+                    `;
+                }
+                
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-3">
+                        <i class="bi bi-lightbulb text-muted fa-2x mb-2"></i>
+                        <p class="text-muted small mb-0">{{ t('dashboard_no_insights', default='No insights available yet. Continue using the app to generate insights.') }}</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading smart insights:', error);
+            container.innerHTML = `
+                <div class="text-center py-3">
+                    <i class="bi bi-exclamation-triangle text-warning fa-2x mb-2"></i>
+                    <p class="text-muted small mb-0">{{ t('dashboard_insights_error', default='Unable to load insights at this time.') }}</p>
+                </div>
+            `;
+        });
+}
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-NG', {
+        style: 'currency',
+        currency: 'NGN',
+        minimumFractionDigits: 2
+    }).format(amount);
+}
+
+// Handle quick transaction form
+document.getElementById('quickTransactionForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        type: document.getElementById('transactionType').value,
+        amount: parseFloat(document.getElementById('transactionAmount').value),
+        category: document.getElementById('transactionCategory').value,
+        description: document.getElementById('transactionDescription').value
+    };
+    
+    // Validate form data
+    if (!formData.type || !formData.amount || !formData.category || !formData.description) {
+        alert('{{ t("dashboard_fill_all_fields", default="Please fill in all fields") }}');
+        return;
+    }
+    
+    if (formData.amount <= 0) {
+        alert('{{ t("dashboard_amount_positive", default="Amount must be positive") }}');
+        return;
+    }
+    
+    // Submit transaction
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalText = submitButton.innerHTML;
+    submitButton.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>{{ t("general_processing", default="Processing...") }}';
+    submitButton.disabled = true;
+    
+    fetch('{{ url_for("dashboard.create_manual_transaction_api") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reset form
+            this.reset();
+            
+            // Show success message
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+            alertDiv.innerHTML = `
+                <i class="bi bi-check-circle me-2"></i>${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            this.appendChild(alertDiv);
+            
+            // Refresh dashboard data
+            setTimeout(() => {
+                refreshRecentActivity();
+                {% if personal_finance_summary.has_personal_data %}
+                loadSmartInsights();
+                {% endif %}
+            }, 1000);
+            
+            // Remove alert after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        } else {
+            alert('{{ t("dashboard_transaction_error", default="Error creating transaction") }}: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error creating transaction:', error);
+        alert('{{ t("dashboard_transaction_error", default="Error creating transaction") }}');
+    })
+    .finally(() => {
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
+    });
+});
+</script>
+{% endblock %}
