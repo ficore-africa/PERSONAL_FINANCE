@@ -1,0 +1,418 @@
+/* Offline UI Styles for FiCore Africa */
+
+/* Online/Offline Status Indicator */
+.status-indicator {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1050;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.status-indicator.online {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-indicator.offline {
+    background-color: #dc3545;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Offline Notice Banner */
+.offline-notice {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    padding: 12px 20px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 1040;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: none;
+}
+
+.offline-notice.show {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.offline-notice .notice-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.offline-notice .notice-icon {
+    font-size: 1.2rem;
+}
+
+/* Sync Status */
+.sync-status {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: #0F3D57;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 25px;
+    font-size: 0.875rem;
+    z-index: 1050;
+    display: none;
+    box-shadow: 0 4px 12px rgba(15, 61, 87, 0.3);
+}
+
+.sync-status.show {
+    display: block;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Offline Form Styles */
+.form-offline-mode {
+    position: relative;
+}
+
+.form-offline-mode::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 193, 7, 0.1);
+    border: 2px dashed #ffc107;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.btn.offline-mode {
+    background-color: #ffc107 !important;
+    border-color: #ffc107 !important;
+    color: #000 !important;
+    position: relative;
+}
+
+.btn.offline-mode::after {
+    content: '📱';
+    margin-left: 8px;
+}
+
+.btn.offline-mode:hover {
+    background-color: #e0a800 !important;
+    border-color: #d39e00 !important;
+}
+
+/* Offline Notifications */
+.offline-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    z-index: 1060;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.offline-notification.success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.offline-notification.error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.offline-notification.warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+}
+
+.offline-notification.info {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 10px;
+}
+
+.notification-content i {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.notification-content span {
+    flex: 1;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.close-btn:hover {
+    opacity: 1;
+}
+
+/* Offline Data Indicators */
+.data-offline-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-left: 10px;
+}
+
+.data-offline-indicator i {
+    color: #ffc107;
+}
+
+/* Loading States for Offline */
+.offline-loading {
+    position: relative;
+    opacity: 0.7;
+}
+
+.offline-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #0F3D57;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Offline Page Styles */
+.offline-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #F2EFEA 0%, #e8e5e0 100%);
+    padding: 20px;
+}
+
+.offline-container {
+    text-align: center;
+    max-width: 500px;
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.offline-icon {
+    font-size: 4rem;
+    color: #0F3D57;
+    margin-bottom: 20px;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.offline-container h1 {
+    color: #0F3D57;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.offline-container p {
+    color: #6c757d;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.retry-btn {
+    background: #0F3D57;
+    color: white;
+    padding: 12px 32px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.retry-btn:hover {
+    background: #0a2d42;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(15, 61, 87, 0.3);
+}
+
+/* Dark Mode Support */
+.dark-mode .offline-notice {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+}
+
+.dark-mode .sync-status {
+    background: #495057;
+}
+
+.dark-mode .offline-container {
+    background: #343a40;
+    color: #f8f9fa;
+}
+
+.dark-mode .offline-container h1 {
+    color: #f8f9fa;
+}
+
+.dark-mode .offline-container p {
+    color: #adb5bd;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .status-indicator {
+        top: 5px;
+        right: 5px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .offline-notification {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .sync-status {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        text-align: center;
+    }
+    
+    .offline-container {
+        padding: 30px 20px;
+        margin: 0 10px;
+    }
+    
+    .offline-icon {
+        font-size: 3rem;
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .offline-notification,
+    .offline-notice,
+    .sync-status {
+        animation: none;
+    }
+    
+    .offline-icon {
+        animation: none;
+    }
+    
+    .status-indicator.offline {
+        animation: none;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .status-indicator.online {
+        background-color: #000;
+        color: #fff;
+        border: 2px solid #fff;
+    }
+    
+    .status-indicator.offline {
+        background-color: #fff;
+        color: #000;
+        border: 2px solid #000;
+    }
+}

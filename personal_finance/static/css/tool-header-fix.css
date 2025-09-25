@@ -1,0 +1,134 @@
+/* Tool Header Breadcrumbs Fix - Prevents Shopping Icon Overflow */
+
+.tool-header {
+    padding: 0 1rem;
+}
+
+.tool-header .btn-group {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    max-width: 100%;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.tool-header .btn-group .btn {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 30%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tool-header .btn-group .btn i {
+    font-size: 1.1rem;
+    margin-right: 0.25rem;
+    flex-shrink: 0;
+}
+
+.tool-header .btn-group .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Tablet styles */
+@media (max-width: 768px) {
+    .tool-header .btn-group .btn {
+        max-width: 28%;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .tool-header .btn-group .btn i {
+        font-size: 1rem;
+        margin-right: 0.2rem;
+    }
+}
+
+/* Mobile styles */
+@media (max-width: 576px) {
+    .tool-header .btn-group {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        justify-content: space-around;
+    }
+    
+    .tool-header .btn-group .btn {
+        max-width: 45%;
+        padding: 0.4rem 0.5rem;
+        font-size: 0.75rem;
+        min-height: 40px;
+    }
+    
+    .tool-header .btn-group .btn i {
+        font-size: 0.9rem;
+        margin-right: 0.15rem;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+    .tool-header .btn-group {
+        gap: 0.3rem;
+    }
+    
+    .tool-header .btn-group .btn {
+        max-width: 42%;
+        padding: 0.35rem 0.4rem;
+        font-size: 0.7rem;
+        min-height: 38px;
+    }
+    
+    .tool-header .btn-group .btn i {
+        font-size: 0.85rem;
+        margin-right: 0.1rem;
+    }
+}
+
+/* Very small screens - stack vertically if needed */
+@media (max-width: 360px) {
+    .tool-header .btn-group {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .tool-header .btn-group .btn {
+        max-width: 80%;
+        width: 80%;
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .tool-header .btn-group .btn i {
+        font-size: 1rem;
+        margin-right: 0.3rem;
+    }
+}
+/*
+ Dark mode support for tool header */
+.dark-mode .tool-header .btn-group .btn {
+    border-color: #4b5563;
+    color: #e5e7eb;
+}
+
+.dark-mode .tool-header .btn-group .btn:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+    color: #93c5fd;
+}
+
+.dark-mode .tool-header .btn-group .btn.active {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+}

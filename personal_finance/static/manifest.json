@@ -1,0 +1,92 @@
+{
+    "name": "FiCore Africa",
+    "short_name": "FiCore",
+    "description": "Manage your finances with ease - Works offline!",
+    "start_url": "/general/home",
+    "display": "standalone",
+    "background_color": "#F2EFEA",
+    "theme_color": "#0F3D57",
+    "orientation": "portrait",
+    "categories": ["finance", "productivity", "business"],
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "/static/img/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/img/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/img/favicon-32x32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/img/favicon-16x16.png",
+            "sizes": "16x16",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/img/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/static/img/screenshot-wide.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/static/img/screenshot-narrow.png",
+            "sizes": "720x1280",
+            "type": "image/png",
+            "form_factor": "narrow"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Add Bill",
+            "short_name": "Add Bill",
+            "description": "Quickly add a new bill",
+            "url": "/bills/add",
+            "icons": [
+                {
+                    "src": "/static/img/icons/bill-icon.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "View Dashboard",
+            "short_name": "Dashboard",
+            "description": "View your financial dashboard",
+            "url": "/dashboard/",
+            "icons": [
+                {
+                    "src": "/static/img/icons/dashboard-icon.png",
+                    "sizes": "96x96"
+                }
+            ]
+        }
+    ],
+    "lang": "en",
+    "dir": "ltr",
+    "scope": "/",
+    "id": "ficore-africa-pwa",
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
+    "handle_links": "preferred",
+    "edge_side_panel": {
+        "preferred_width": 400
+    }
+}
