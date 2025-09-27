@@ -163,7 +163,6 @@
                         <div class="nav-label">{{ t(item.label_key, default=item.label) | e }}</div>
                     </a>
                 {% endfor %}
-                </a>
             </div>
         </nav>
     {% endif %}
@@ -229,6 +228,15 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            background-color: #fff;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .fintech-top-header.scrolled {
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 8px 20px;
         }
         .header-left {
             display: flex;
@@ -271,6 +279,17 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+        .header-right .icon-btn,
+        .header-right .language-buttons {
+            opacity: 0.5;
+            transform: scale(0.9);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .fintech-top-header.scrolled .header-right .icon-btn,
+        .fintech-top-header.scrolled .header-right .language-buttons {
+            opacity: 1;
+            transform: scale(1);
         }
         .toast {
             position: fixed;
@@ -535,6 +554,16 @@
                 }, false);
             }
 
+            // Header scroll behavior
+            const header = document.querySelector('.fintech-top-header');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
             // Dark mode initialization
             const storedDarkMode = localStorage.getItem('dark_mode');
             const isDark = storedDarkMode === 'true';
@@ -544,7 +573,7 @@
                 toggles.forEach(toggle => {
                     toggle.querySelector('i').className = 'bi bi-sun';
                     toggle.setAttribute('data-bs-title', '{{ t("general_mode_toggle_tooltip_switch_to_light", default="Switch to light mode") | e }}');
-                    toggle.setAttribute('aria-label', '{{ t("general_mode_toggle_light", default="Toggle light mode") | e }}');
+                    toggle.setAttribute('aria-label', '{{ t("general_mode_toggle_light', default="Toggle light mode") | e }}');
                 });
             }
 
