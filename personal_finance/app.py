@@ -34,6 +34,7 @@ from budget.budget import budget_bp
 from summaries.routes import summaries_bp
 from shopping.shopping import shopping_bp
 from api_offline_support import offline_api_bp
+from tracking.routes import tracking_bp
 
 # Load environment variables
 load_dotenv()
@@ -183,6 +184,7 @@ def create_app():
     app.register_blueprint(summaries_bp, url_prefix='/summaries')
     app.register_blueprint(shopping_bp, url_prefix='/shopping')
     app.register_blueprint(general_bp, url_prefix='/general')
+    app.register_blueprint(tracking_bp)
     app.register_blueprint(offline_api_bp)
     
     # Initialize data
