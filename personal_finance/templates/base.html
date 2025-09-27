@@ -30,8 +30,6 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body class="{% if session.get('dark_mode', False) %}dark-mode{% endif %}">
-    <!-- Online/Offline Status Indicator -->
-    <div id="online-status" class="status-indicator online">Online</div>
     
     <!-- Offline Notice Banner -->
     <div id="offline-notice" class="offline-notice">
