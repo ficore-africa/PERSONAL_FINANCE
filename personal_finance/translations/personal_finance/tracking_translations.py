@@ -20,7 +20,7 @@ TRACKING_TRANSLATIONS = {
         'tracking_other': 'Other',
         'tracking_amount': 'Amount',
         'tracking_amount_invalid': 'Amount must be positive',
-        'tracking_description': 'Description',
+        'tracking_description': 'Track your income and expenses',
         'tracking_date': 'Date',
         'tracking_submit': 'Log Transaction',
         'tracking_transaction_created': 'Transaction logged successfully',
