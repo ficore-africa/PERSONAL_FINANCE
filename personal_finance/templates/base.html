@@ -30,6 +30,8 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body class="{% if session.get('dark_mode', False) %}dark-mode{% endif %}">
+    <!-- Online/Offline Status Indicator -->
+    <div id="online-status" class="status-indicator online">Online</div>
     
     <!-- Offline Notice Banner -->
     <div id="offline-notice" class="offline-notice">
@@ -99,7 +101,7 @@
                     {% else %}
                         <li class="nav-item">
                             <div class="language-buttons d-flex">
-                                <button class="nav-link btn btn-link language-btn {% if current_lang == 'en' %}active{% endif %}" id="navLangEnBtn" onclick="setLanguage('en')" data-bs-toggle="tooltip" data-bs-toggle="tooltip" data-bs-title="{{ t('general_language_english', default='Switch to English') | e }}">EN</button>
+                                <button class="nav-link btn btn-link language-btn {% if current_lang == 'en' %}active{% endif %}" id="navLangEnBtn" onclick="setLanguage('en')" data-bs-toggle="tooltip" data-bs-title="{{ t('general_language_english', default='Switch to English') | e }}">EN</button>
                                 <button class="nav-link btn btn-link language-btn {% if current_lang == 'ha' %}active{% endif %}" id="navLangHaBtn" onclick="setLanguage('ha')" data-bs-toggle="tooltip" data-bs-title="{{ t('general_language_hausa', default='Switch to Hausa') | e }}">HA</button>
                             </div>
                         </li>
@@ -208,8 +210,9 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 20px;
-            position: sticky;
+            position: fixed;
             top: 0;
+            width: 100%;
             background-color: #fff;
             z-index: 1000;
             transition: all 0.3s ease;
@@ -262,14 +265,13 @@
         }
         .header-right .icon-btn,
         .header-right .language-buttons {
-            opacity: 0.5;
-            transform: scale(0.9);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        .fintech-top-header.scrolled .header-right .icon-btn,
-        .fintech-top-header.scrolled .header-right .language-buttons {
             opacity: 1;
-            transform: scale(1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .header-right .icon-btn:hover,
+        .header-right .language-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
         }
         .toast {
             position: fixed;
@@ -293,8 +295,9 @@
             margin: 0;
         }
         .dynamic-nav {
-            position: sticky;
+            position: fixed;
             top: 0;
+            width: 100%;
             z-index: 900;
             opacity: 0;
             transform: translateY(-100%);
