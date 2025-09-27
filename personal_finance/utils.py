@@ -81,6 +81,14 @@ _PERSONAL_TOOLS = [
         "icon": "bi-wallet"
     },
     {
+        "endpoint": "tracking.index",
+        "label": "Track",
+        "label_key": "tracking_index",
+        "description_key": "tracking_index_desc",
+        "tooltip_key": "tracking_index_tooltip",
+        "icon": "bi-pencil-square"
+    },
+    {
         "endpoint": "bill.index",
         "label": "Bills",
         "label_key": "bill_bill_planner",
@@ -159,6 +167,14 @@ _PERSONAL_NAV = [
 
 _PERSONAL_EXPLORE_FEATURES = [
     {
+        "endpoint": "dashboard.index",
+        "label": "Dashboard",
+        "label_key": "dashboard_title",
+        "description_key": "dashboard_desc",
+        "tooltip_key": "dashboard_tooltip",
+        "icon": "bi-speedometer2"
+    },
+    {
         "endpoint": "budget.index",
         "label": "Budget",
         "label_key": "budget_budget_planner",
@@ -175,12 +191,12 @@ _PERSONAL_EXPLORE_FEATURES = [
         "icon": "bi-pencil-square"
     },
     {
-    'endpoint': 'tracking.history',
-    'label': 'Transaction History',
-    'label_key': 'tracking_history',
-    'description_key': 'tracking_history_desc',
-    'tooltip_key': 'tracking_history_tooltip',
-    'icon': 'bi-clock-history'
+        'endpoint': 'tracking.history',
+        'label': 'Transaction History',
+        'label_key': 'tracking_history',
+        'description_key': 'tracking_history_desc',
+        'tooltip_key': 'tracking_history_tooltip',
+        'icon': 'bi-clock-history'
     },
     {
         "endpoint": "bill.index",
@@ -199,20 +215,20 @@ _PERSONAL_EXPLORE_FEATURES = [
         "icon": "bi-cart"
     },
     {
-        "endpoint": "reports.budget_performance",
-        "label": "Budget Performance Report",
-        "label_key": "reports_budget_performance",
-        "description_key": "reports_budget_performance_desc",
-        "tooltip_key": "reports_budget_performance_tooltip",
-        "icon": "bi-graph-up"
+        "endpoint": "reports.index",
+        "label": "Reports",
+        "label_key": "reports_index",
+        "description_key": "reports_index_desc",
+        "tooltip_key": "reports_index_tooltip",
+        "icon": "bi-file-earmark-text"
     },
     {
-        "endpoint": "reports.shopping_report",
-        "label": "Shopping Report",
-        "label_key": "reports_shopping",
-        "description_key": "reports_shopping_desc",
-        "tooltip_key": "reports_shopping_tooltip",
-        "icon": "bi-cart-check"
+        "endpoint": "settings.profile",
+        "label": "Profile",
+        "label_key": "profile_settings",
+        "description_key": "profile_settings_desc",
+        "tooltip_key": "profile_tooltip",
+        "icon": "bi-person"
     },
 ]
 
