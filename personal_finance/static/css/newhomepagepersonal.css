@@ -405,7 +405,7 @@
 
 /* Promotion Card */
 .personal-promotion-card {
-    background-color: var(--primary-color-light); /* Dynamic primary color for promotion */
+    background-color: #051542; /* Dynamic primary color for promotion */
     color: #fff; /* Text remains white for contrast on primary color */
     padding: 1.5rem;
     text-align: center;
