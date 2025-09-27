@@ -63,9 +63,7 @@ KEY_PREFIX_TO_MODULE = {
     'bill_': 'bill',
     'budget_': 'budget',
     'shopping_': 'shopping',
-    'tracking_': 'tracking'
-    
-    # Accounting Tools prefixes
+    'tracking_': 'tracking',
     'admin_': 'admin',
     'reports_': 'reports',
     
