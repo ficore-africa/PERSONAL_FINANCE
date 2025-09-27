@@ -5,7 +5,7 @@ from wtforms import StringField, FloatField, SelectField, TextAreaField, DateFie
 from wtforms.validators import DataRequired, NumberRange
 from translations import trans
 from utils import get_mongo_db, logger
-from models import create_manual_transaction, get_transactions
+from models import create_transaction, get_transactions
 from datetime import datetime
 
 tracking_bp = Blueprint('tracking', __name__, url_prefix='/tracking')
@@ -64,7 +64,7 @@ def index():
                 'created_at': datetime.utcnow(),
                 'metadata': {'source': 'tracking_manual'}
             }
-            transaction_id = create_manual_transaction(
+            transaction_id = create_transaction(
                 db=db,
                 user_id=str(current_user.id),
                 transaction_type=form.type.data,
