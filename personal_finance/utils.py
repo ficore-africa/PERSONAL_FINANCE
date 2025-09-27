@@ -145,7 +145,7 @@ _PERSONAL_NAV = [
         "label_key": "tracking_index",
         "description_key": "tracking_index_desc",
         "tooltip_key": "tracking_index_tooltip",
-        "icon": "bi-file-earmark-text"
+        "icon": "bi-pencil-square"
     },
     {
         "endpoint": "settings.profile",
@@ -172,7 +172,15 @@ _PERSONAL_EXPLORE_FEATURES = [
         "label_key": "tracking_index",
         "description_key": "tracking_index_desc",
         "tooltip_key": "tracking_index_tooltip",
-        "icon": "bi-file-earmark-text"
+        "icon": "bi-pencil-square"
+    },
+    {
+    'endpoint': 'tracking.history',
+    'label': 'Transaction History',
+    'label_key': 'tracking_history',
+    'description_key': 'tracking_history_desc',
+    'tooltip_key': 'tracking_history_tooltip',
+    'icon': 'bi-clock-history'
     },
     {
         "endpoint": "bill.index",
