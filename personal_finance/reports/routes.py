@@ -188,7 +188,7 @@ def budget_performance():
                 budget_query['created_at'] = budget_query.get('created_at', {}) | {'$lte': end_datetime}
                 cashflow_query['created_at'] = cashflow_query.get('created_at', {}) | {'$lte': end_datetime}
             budgets = list(db.budgets.find(budget_query).sort('created_at', -1))
-            cashflows = [utils.to_dict_cashflow(cf) for cf in db.cashflows.find(cashflow_query).sort('created_at', -1))
+            cashflows = [utils.to_dict_cashflow(cf) for cf in db.cashflows.find(cashflow_query).sort('created_at', -1)]
             for budget in budgets:
                 budget_dict = to_dict_budget(budget)
                 actual_income = sum(cf['amount'] for cf in cashflows if cf['type'] == 'receipt')
