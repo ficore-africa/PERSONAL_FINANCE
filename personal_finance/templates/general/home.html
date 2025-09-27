@@ -1,295 +1,185 @@
-{% extends "base.html" %}
-{% block title %}{{ t('personal_title', default='Personal Dashboard') }}{% endblock %}
-
-{% block extra_head %}
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<style>
-.personal-card {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    border: none;
-    border-radius: 12px;
-}
-.personal-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-}
-.personal-amount-value {
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-.personal-status-indicator {
-    font-size: 0.9rem;
-}
-.recent-activity-item {
-    border-left: 4px solid #007bff;
-    padding-left: 15px;
-    margin-bottom: 15px;
-    transition: all 0.3s ease;
-}
-.recent-activity-item:hover {
-    background-color: rgba(0,123,255,0.05);
-    border-radius: 8px;
-    padding: 10px 15px;
-    margin-left: -10px;
-}
-.personal-recent-activity-item {
-    border-left: 4px solid #007bff;
-    padding-left: 15px;
-    margin-bottom: 15px;
-    transition: all 0.3s ease;
-}
-.personal-recent-activity-item:hover {
-    background-color: rgba(0,123,255,0.05);
-    border-radius: 8px;
-    padding: 10px 15px;
-    margin-left: -10px;
-}
-.personal-activity-icon-wrapper {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 10px;
-}
-.personal-activity-content-placeholder {
-    flex-grow: 1;
-}
-.personal-no-activity {
-    opacity: 0.7;
-}
-.animate-click {
-    transform: scale(0.98);
-    transition: transform 0.1s ease-in-out;
-}
-.text-budget { color: #007bff; }
-.text-bill { color: #ffc107; }
-.text-shopping { color: #17a2b8; }
-.text-credits { color: #28a745; }
-</style>
-{% endblock %}
+{% extends 'base.html' %}
+{% block title %}{{ t('page_title', default='Gida na Kuɗaɗen Kai Tsaye') }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <h2 class="mb-1">{{ t('personal_welcome', default='Welcome') }} {{ current_user.name if current_user.is_authenticated else t('personal_guest', default='Guest') }}</h2>
-            <p class="text-muted mb-4">{{ t('personal_subtitle', default='Your financial overview at a glance') }}</p>
+<div class="personal-page-container">
+    <noscript>
+        <div class="personal-no-js-warning">
+            {{ t('javascript_required', default='Ana buƙatar JavaScript don amfani da wannan dashboard. Da fatan za a kunna shi a cikin burauzarka.') }}
         </div>
-    </div>
+    </noscript>
 
     {% if current_user.is_authenticated %}
-    <!-- Financial Summary Cards -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-3 col-md-6">
-            <div class="card personal-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0">{{ t('budget_status', default='Budget Status') }}</h6>
-                        <i class="bi bi-pie-chart-fill text-primary"></i>
-                    </div>
-                    <div class="personal-amount-value" id="budgetStatus" data-amount="0">****</div>
-                    <small class="personal-status-indicator text-muted">{{ t('loading', default='Loading...') }}</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="card personal-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0">{{ t('upcoming_bills', default='Upcoming Bills') }}</h6>
-                        <i class="bi bi-receipt text-warning"></i>
-                    </div>
-                    <div class="personal-amount-value" id="upcomingBills" data-amount="0">****</div>
-                    <small class="personal-status-indicator text-muted">{{ t('loading', default='Loading...') }}</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="card personal-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0">{{ t('shopping_spending', default='Shopping Spending') }}</h6>
-                        <i class="bi bi-cart text-info"></i>
-                    </div>
-                    <div class="personal-amount-value" id="shoppingSpending" data-amount="0">****</div>
-                    <small class="personal-status-indicator text-muted">{{ t('loading', default='Loading...') }}</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="card personal-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0">{{ t('wallet_balance', default='Wallet Balance') }}</h6>
-                        <i class="bi bi-wallet2 text-success"></i>
-                    </div>
-                    <div class="personal-amount-value" id="walletBalance" data-amount="0">****</div>
-                    <small class="text-muted">{{ t('ficore_credits', default='FiCore Credits') }}</small>
-                </div>
-            </div>
-        </div>
-    </div>
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Recent Activity and Quick Actions -->
-    <div class="row g-4">
-        <!-- Recent Activity -->
-        <div class="col-lg-8">
-            <div class="card personal-card h-100">
-                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bi bi-clock-history me-2"></i>{{ t('recent_activity', default='Recent Activity') }}
-                    </h5>
-                    <a href="#" id="viewAllActivities" class="btn btn-sm btn-outline-primary" onclick="toggleRecentActivities()">{{ t('view_all', default='View All') }}</a>
-                </div>
-                <div class="card-body">
-                    <div id="recentActivityListLimited"></div>
-                    <div id="recentActivityListFull" class="d-none"></div>
-                </div>
+        <section class="personal-balance-display-card fintech-green-bg">
+            <div class="personal-balance-header">
+                <span class="personal-balance-label">{{ t('ficore_credits', default='Ƙididdigar Ficore') }}</span>
+                <button class="btn btn-link personal-toggle-visibility-btn" onclick="toggleAmountVisibility()" data-bs-toggle="tooltip" data-bs-title="{{ t('toggle_amount_visibility', default='Canja ganin adadin kuɗi') }}">
+                    <i id="visibilityIcon" class="bi bi-eye"></i>
+                </button>
             </div>
-        </div>
+            <div class="personal-balance-amount-wrapper">
+                <span class="personal-currency-symbol">FCs</span>
+                <span class="personal-amount-value" id="walletBalance" data-amount="0">0.00</span>
+            </div>
+            <div class="personal-balance-actions">
+                <a href="{{ url_for('credits.request_credits', _external=True) | e }}" class="personal-add-credits-btn">
+                    <i class="bi bi-plus-circle"></i> {{ t('add_credits', default='Ƙara Kudi') }}
+                </a>
+                <a href="{{ url_for('credits.history', _external=True) | e }}" class="personal-view-history-link">
+                    {{ t('view_history', default='Duba Tarihi') }} <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </section>
 
-        <!-- Quick Actions -->
-        <div class="col-lg-4">
-            <div class="card personal-card h-100">
-                <div class="card-header bg-transparent border-0">
-                    <h5 class="mb-0">
-                        <i class="bi bi-lightning-charge me-2"></i>{{ t('quick_actions', default='Quick Actions') }}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <a href="{{ url_for('budget.index') }}" class="btn btn-outline-primary w-100 btn-sm personal-quick-action-item">
-                                <i class="bi bi-pie-chart d-block mb-1"></i>
-                                <small>{{ t('budget_title', default='Budget') }}</small>
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="{{ url_for('bill.index') }}" class="btn btn-outline-warning w-100 btn-sm personal-quick-action-item">
-                                <i class="bi bi-receipt d-block mb-1"></i>
-                                <small>{{ t('bill_title', default='Bills') }}</small>
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="{{ url_for('shopping.index') }}" class="btn btn-outline-info w-100 btn-sm personal-quick-action-item">
-                                <i class="bi bi-cart d-block mb-1"></i>
-                                <small>{{ t('shopping_title', default='Shopping') }}</small>
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="{{ url_for('reports.index') }}" class="btn btn-outline-success w-100 btn-sm personal-quick-action-item">
-                                <i class="bi bi-graph-up d-block mb-1"></i>
-                                <small>{{ t('reports_title', default='Reports') }}</small>
-                            </a>
-                        </div>
+        <section class="personal-section-card personal-recent-activity-fintech">
+            <div class="personal-section-header-flex">
+                <h3 class="personal-section-title">{{ t('recent_activity', default='Ayyukan Kwanan Nan') }}</h3>
+                <a href="{{ url_for('summaries.all_activities', _external=True) | e }}" class="btn btn-link btn-sm p-0 text-decoration-none" id="viewAllActivities" onclick="event.preventDefault(); toggleRecentActivities();">
+                    {{ t('view_all', default='Duba Duk') }}
+                </a>
+            </div>
+            <div id="recentActivityListLimited" class="personal-activity-list">
+                <div class="personal-recent-activity-item personal-no-activity">
+                    <div class="personal-activity-icon-wrapper">
+                        <i class="bi bi-info-circle text-muted"></i>
+                    </div>
+                    <div class="personal-activity-content-placeholder">
+                        <div class="personal-activity-description fw-semibold">{{ t('no_recent_activity', default='Babu ayyukan kwanan nan') }}</div>
+                        <div class="personal-activity-time text-muted">{{ t('start_activity', default='Fara da ƙara kasafin kuɗi ko kuɗi') }}</div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+            <div id="recentActivityListFull" class="personal-activity-list d-none">
+            </div>
+        </section>
 
-    <!-- Available Services -->
-    <div class="row g-4 mt-2">
-        <div class="col-12">
-            <h5 class="mb-3">{{ t('available_services', default='Available Services') }}</h5>
-            <div class="row g-3">
-                <div class="col-lg-3 col-md-6">
-                    <a href="{{ url_for('budget.index') }}" class="card personal-card personal-service-grid-item h-100 text-decoration-none">
-                        <div class="card-body text-center">
-                            <i class="bi bi-pie-chart-fill text-budget fa-2x mb-2"></i>
-                            <h6 class="mb-0">{{ t('budget_title', default='Budget') }}</h6>
-                            <p class="text-muted small mb-0">{{ t('budget_description', default='Plan and track your income and expenses') }}</p>
+        <section class="personal-section-card personal-quick-actions-grid">
+            <h3 class="personal-section-title visually-hidden">{{ t('plan_your_spending_quick_actions', default='Quick Actions') }}</h3>
+            <div class="personal-actions-grid">
+                <a href="{{ url_for('budget.index', _external=True) | e }}" class="personal-quick-action-item personal-budget-management text-decoration-none" aria-label="{{ t('budget', default='Budget') | e }}">
+                    <div class="personal-action-icon-wrapper">
+                        <i class="bi bi-pie-chart personal-action-icon"></i>
+                    </div>
+                    <div class="personal-action-label">{{ t('budget', default='Budget') }}</div>
+                </a>
+                <a href="{{ url_for('bill.index', _external=True) | e }}" class="personal-quick-action-item personal-bills-management text-decoration-none" aria-label="{{ t('bills', default='Bills') | e }}">
+                    <div class="personal-action-icon-wrapper">
+                        <i class="bi bi-receipt personal-action-icon"></i>
+                    </div>
+                    <div class="personal-action-label">{{ t('bills', default='Bills') }}</div>
+                </a>
+                <a href="{{ url_for('shopping.index', _external=True) | e }}" class="personal-quick-action-item personal-shopping-management text-decoration-none" aria-label="{{ t('shopping', default='Shopping') | e }}">
+                    <div class="personal-action-icon-wrapper">
+                        <i class="bi bi-cart personal-action-icon"></i>
+                    </div>
+                    <div class="personal-action-label">{{ t('shopping', default='Shopping') }}</div>
+                </a>
+            </div>
+        </section>
+
+        <section class="personal-section-card personal-tools-grid-section">
+            <h3 class="personal-section-title">{{ t('explore_all_tools', default='Explore All Tools') }}</h3>
+            <div class="personal-services-grid">
+                {% for tool in tools_for_template %}
+                    <a href="{{ tool.url | e }}" class="personal-service-grid-item text-decoration-none" aria-label="{{ t(tool.label_key, default=tool.label) | e }}">
+                        <div class="personal-service-icon-wrapper">
+                            <i class="bi {{ tool.icon | e }}"></i>
                         </div>
+                        <div class="personal-service-label">{{ t(tool.label_key, default=tool.label) | e }}</div>
                     </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="personal-section-card personal-financial-snapshots-overview">
+            <h3 class="personal-section-title">{{ t('finance_snapshots', default='Bayanan Kuɗaɗe') }}</h3>
+            <div class="personal-snapshots-summary-grid">
+                <div class="personal-snapshot-item">
+                    <i class="bi bi-pie-chart text-primary"></i>
+                    <div class="personal-snapshot-content">
+                        <div class="personal-snapshot-label">{{ t('budget_status', default='Matsayin Kasafin Kuɗi') }}</div>
+                        <div class="personal-snapshot-value" id="budgetStatus" data-amount="0">
+                            <span class="personal-currency-symbol">₦</span><span class="personal-amount-value">0.00</span>
+                        </div>
+                        <div class="personal-status-indicator" id="budgetStatusLabel"></div>
+                    </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                    <a href="{{ url_for('bill.index') }}" class="card personal-card personal-service-grid-item h-100 text-decoration-none">
-                        <div class="card-body text-center">
-                            <i class="bi bi-receipt-cutoff text-bill fa-2x mb-2"></i>
-                            <h6 class="mb-0">{{ t('bill_title', default='Bills') }}</h6>
-                            <p class="text-muted small mb-0">{{ t('bill_description', default='Manage and pay your bills on time') }}</p>
+                <div class="personal-snapshot-item">
+                    <i class="bi bi-receipt text-warning"></i>
+                    <div class="personal-snapshot-content">
+                        <div class="personal-snapshot-label">{{ t('upcoming_bills', default='Kuɗin da ke Jiran Biya') }}</div>
+                        <div class="personal-snapshot-value" id="upcomingBills" data-amount="0">
+                            <span class="personal-currency-symbol">₦</span><span class="personal-amount-value">0.00</span>
                         </div>
-                    </a>
+                        <div class="personal-status-indicator" id="billsStatusLabel"></div>
+                    </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                    <a href="{{ url_for('shopping.index') }}" class="card personal-card personal-service-grid-item h-100 text-decoration-none">
-                        <div class="card-body text-center">
-                            <i class="bi bi-cart-fill text-shopping fa-2x mb-2"></i>
-                            <h6 class="mb-0">{{ t('shopping_title', default='Shopping') }}</h6>
-                            <p class="text-muted small mb-0">{{ t('shopping_description', default='Create and track shopping lists') }}</p>
+                <div class="personal-snapshot-item">
+                    <i class="bi bi-cart text-info"></i>
+                    <div class="personal-snapshot-content">
+                        <div class="personal-snapshot-label">{{ t('shopping_spending', default='KasheKashen Siyayya') }}</div>
+                        <div class="personal-snapshot-value" id="shoppingSpending" data-amount="0">
+                            <span class="personal-currency-symbol">₦</span><span class="personal-amount-value">0.00</span>
                         </div>
-                    </a>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <a href="{{ url_for('credits.request_credits') }}" class="card personal-card personal-service-grid-item h-100 text-decoration-none">
-                        <div class="card-body text-center">
-                            <i class="bi bi-wallet2 text-credits fa-2x mb-2"></i>
-                            <h6 class="mb-0">{{ t('credits_title', default='FiCore Credits') }}</h6>
-                            <p class="text-muted small mb-0">{{ t('credits_description', default='Manage your credits and transactions') }}</p>
-                        </div>
-                    </a>
+                        <div class="personal-status-indicator" id="shoppingStatusLabel"></div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    {% else %}
-    <!-- Guest View -->
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="card personal-card text-center py-5">
-                <div class="card-body">
-                    <i class="bi bi-speedometer2 fa-4x text-primary mb-4"></i>
-                    <h3 class="mb-3">{{ t('welcome_ficore', default='Welcome to FiCore') }}</h3>
-                    <p class="text-muted mb-4">{{ t('please_login', default='Please log in to view your personalized financial dashboard.') }}</p>
-                    <a href="{{ url_for('users.login') }}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-box-arrow-in-right me-2"></i>{{ t('general_login', default='Log In') }}
+        <section class="personal-section-card personal-services-grid-section">
+            <h3 class="personal-section-title">{{ t('explore_features', default='Bincika Abubuwan Haɗin') }}</h3>
+            <div class="personal-services-grid">
+                {% for feature in explore_features_for_template %}
+                    <a href="{{ feature.url | e }}" class="personal-service-grid-item text-decoration-none" aria-label="{{ t(feature.label_key, default=feature.label) | e }}">
+                        <div class="personal-service-icon-wrapper">
+                            <i class="bi {{ feature.icon | e }}"></i>
+                        </div>
+                        <div class="personal-service-label">{{ t(feature.label_key, default=feature.label) | e }}</div>
                     </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="personal-section-card personal-promotion-card">
+            <div class="personal-promotion-content">
+                <img src="/static/img/promotion_banner.png" alt="Special Offer" class="personal-promotion-image"> 
+                <div class="personal-promotion-text">
+                    <h4>{{ t('special_announcement_title', default='Sanarwa na Musamman!') }}</h4>
+                    <p>{{ t('special_announcement_description', default='Ku sami damar samun karin haske na musamman akan muamalarku na kudi yau da kullum!') }}</p>
+                    <a href="/general/personal-finance-tips" class="btn btn-sm btn-outline-light">{{ t('learn_more', default='Ƙara Koyo') }}</a>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
+
     {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
+<style>
+.text-budget { color: #007bff; }
+.text-bill { color: #ffc107; }
+.text-shopping { color: #17a2b8; }
+.text-credits { color: #28a745; }
+</style>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize tooltips
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
-
-    // Check Bootstrap Icons
-    document.querySelectorAll('.bi').forEach(icon => {
-        if (!icon.className.includes('bi-')) {
-            console.warn('Invalid or missing Bootstrap Icon class:', icon.className);
-        }
-    });
-
-    // Load financial summary and recent activity for authenticated users
-    {% if current_user.is_authenticated %}
-    loadFinancialSummary();
-    refreshRecentActivity();
-
-    // Auto-refresh recent activity every 5 minutes
-    setInterval(refreshRecentActivity, 300000);
-
-    // Add click animation for quick actions and service cards
-    document.querySelectorAll('.personal-quick-action-item, .personal-service-grid-item').forEach(card => {
-        card.addEventListener('click', () => {
-            card.classList.add('animate-click');
-            setTimeout(() => {
-                card.classList.remove('animate-click');
-            }, 200);
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
-            }
-        });
-    });
-    {% endif %}
-});
+window.apiUrls = {
+    budgetSummary: "/summaries/budget/summary",
+    billSummary: "/summaries/bill/summary",
+    shoppingSummary: "/summaries/shopping/summary",
+    ficoreBalance: "/summaries/ficore_balance",
+    allActivities: "/summaries/all_activities",
+    notifications: "/summaries/notifications",
+    manageShoppingLists: "/shopping/main",
+    manageShoppingItems: "/shopping/lists/{list_id}/items",
+    shareShoppingList: "/shopping/lists/{list_id}/share",
+    shoppingPriceHistory: "/shopping/price_history/{item_name}",
+    predictiveSuggestions: "/shopping/suggestions",
+    requestFicoreCredits: "{{ url_for('credits.request_credits', _external=True) | e }}"
+};
 
 let amountsVisible = true;
 let isActivityExpanded = false;
@@ -333,106 +223,6 @@ function toggleAmountVisibility() {
     });
 }
 
-function refreshRecentActivity() {
-    const limitedList = document.getElementById('recentActivityListLimited');
-    const fullList = document.getElementById('recentActivityListFull');
-    
-    limitedList.innerHTML = `
-        <div class="personal-recent-activity-item">
-            <div class="personal-activity-content-placeholder">
-                <div class="personal-activity-description fw-semibold">${window.t('loading', { default: 'Ana loda...' })}</div>
-            </div>
-        </div>
-    `;
-    fullList.innerHTML = limitedList.innerHTML;
-
-    fetch('{{ url_for("dashboard.api_recent_activity") }}')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Server error: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success && data.recent_transactions && data.recent_transactions.length > 0) {
-                updateRecentActivityDisplay(data.recent_transactions);
-            } else {
-                const noActivityHtml = `
-                    <div class="personal-recent-activity-item personal-no-activity">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="d-flex align-items-center mb-1">
-                                    <i class="bi bi-info-circle text-muted me-2"></i>
-                                    <strong>${window.t('no_recent_activity', { default: 'Babu ayyukan kwanan nan' })}</strong>
-                                </div>
-                                <small class="text-muted">${window.t('start_activity_detailed', { default: 'Fara da ƙara kasafin kuɗi, biya kuɗin da ke jiran biya, ko sayen kayan da kuke buƙata don ganin ayyukanku' })}</small>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                limitedList.innerHTML = noActivityHtml;
-                fullList.innerHTML = noActivityHtml;
-            }
-        })
-        .catch(error => {
-            console.error('Error loading recent activity:', error);
-            const errorMessage = error.message.includes('NetworkError') || error.message.includes('Failed to fetch')
-                ? window.t('network_error', { default: 'Kuskuren sadarwa' })
-                : window.t('error_loading_activities', { default: 'Kuskure wajen loda ayyukan' });
-            const errorHtml = `
-                <div class="personal-recent-activity-item personal-no-activity">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center mb-1">
-                                <i class="bi bi-exclamation-triangle text-warning me-2"></i>
-                                <strong>${errorMessage}</strong>
-                            </div>
-                            <small class="text-muted">${window.t('try_again_later', { default: 'Sake gwadawa daga baya' })}</small>
-                        </div>
-                    </div>
-                </div>
-            `;
-            limitedList.innerHTML = errorHtml;
-            fullList.innerHTML = errorHtml;
-        });
-}
-
-function updateRecentActivityDisplay(transactions) {
-    const limitedList = document.getElementById('recentActivityListLimited');
-    const fullList = document.getElementById('recentActivityListFull');
-    
-    const renderTransaction = (transaction) => {
-        const isIncome = transaction.type === 'income';
-        const icon = isIncome ? 'bi-arrow-up-circle text-success' : 'bi-arrow-down-circle text-danger';
-        const amountClass = isIncome ? 'text-success' : 'text-danger';
-        const amountPrefix = isIncome ? '+' : '-';
-        
-        return `
-            <div class="personal-recent-activity-item">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <div class="d-flex align-items-center mb-1">
-                            <i class="bi ${icon} me-2"></i>
-                            <strong>${transaction.description}</strong>
-                            <span class="badge bg-secondary ms-2">${transaction.category}</span>
-                        </div>
-                        <small class="text-muted">${transaction.formatted_date}</small>
-                    </div>
-                    <div class="text-end">
-                        <div class="fw-bold ${amountClass}">
-                            ${amountPrefix}${transaction.formatted_amount}
-                        </div>
-                        <small class="text-muted">${transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}</small>
-                    </div>
-                </div>
-            </div>
-        `;
-    };
-
-    limitedList.innerHTML = transactions.slice(0, 3).map(renderTransaction).join('');
-    fullList.innerHTML = transactions.map(renderTransaction).join('');
-}
-
 function toggleRecentActivities() {
     const limitedList = document.getElementById('recentActivityListLimited');
     const fullList = document.getElementById('recentActivityListFull');
@@ -442,10 +232,82 @@ function toggleRecentActivities() {
     limitedList.classList.toggle('d-none', isActivityExpanded);
     fullList.classList.toggle('d-none', !isActivityExpanded);
     viewAllButton.textContent = isActivityExpanded ? window.t('view_less', { default: 'Duba Ƙasa' }) : window.t('view_all', { default: 'Duba Duk' });
+
+    if (isActivityExpanded) {
+        fullList.innerHTML = `
+            <div class="personal-recent-activity-item">
+                <div class="personal-activity-content-placeholder">
+                    <div class="personal-activity-description fw-semibold">${window.t('loading', { default: 'Ana loda...' })}</div>
+                </div>
+            </div>
+        `;
+        fetch('{{ url_for("dashboard.api_recent_activity") }}')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && data.recent_transactions && data.recent_transactions.length > 0) {
+                    const renderTransaction = (transaction) => {
+                        const isIncome = transaction.type === 'income';
+                        const iconClass = isIncome ? 'bi-arrow-up-circle text-success' : 'bi-arrow-down-circle text-danger';
+                        const amountClass = isIncome ? 'text-success' : 'text-danger';
+                        const amountPrefix = isIncome ? '+' : '-';
+                        
+                        return `
+                        <div class="personal-recent-activity-item">
+                            <div class="personal-activity-icon-wrapper">
+                                <i class="bi ${iconClass}"></i>
+                            </div>
+                            <div class="personal-activity-content">
+                                <div class="personal-activity-description fw-semibold">${transaction.description}</div>
+                                <div class="personal-activity-time text-muted d-flex justify-content-between">
+                                    <span>${formatTimeAgo(transaction.timestamp)}</span>
+                                    <span class="${amountClass} fw-bold">${amountPrefix}${transaction.formatted_amount}</span>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                    };
+                    fullList.innerHTML = data.recent_transactions.map(renderTransaction).join('');
+                } else {
+                    fullList.innerHTML = `
+                        <div class="personal-recent-activity-item personal-no-activity">
+                            <div class="personal-activity-icon-wrapper">
+                                <i class="bi bi-info-circle text-muted"></i>
+                            </div>
+                            <div class="personal-activity-content-placeholder">
+                                <div class="personal-activity-description fw-semibold">${window.t('no_recent_activity', { default: 'Babu ayyukan kwanan nan' })}</div>
+                                <div class="personal-activity-time text-muted">${window.t('start_activity', { default: 'Fara da ƙara kasafin kuɗi ko kuɗi' })}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading recent activity:', error);
+                const errorMessage = error.message.includes('NetworkError') || error.message.includes('Failed to fetch')
+                    ? window.t('network_error', { default: 'Kuskuren sadarwa' })
+                    : window.t('error_loading_activities', { default: 'Kuskure wajen loda ayyukan' });
+                fullList.innerHTML = `
+                    <div class="personal-recent-activity-item personal-no-activity">
+                        <div class="personal-activity-icon-wrapper">
+                            <i class="bi bi-exclamation-triangle text-warning"></i>
+                        </div>
+                        <div class="personal-activity-content-placeholder">
+                            <div class="personal-activity-description fw-semibold">${errorMessage}</div>
+                            <div class="personal-activity-time text-muted">${window.t('try_again_later', { default: 'Sake gwadawa daga baya' })}</div>
+                        </div>
+                    </div>
+                `;
+            });
+    }
 }
 
 function loadFinancialSummary() {
-    fetch('/summaries/budget/summary')
+    fetch(window.apiUrls.budgetSummary)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -463,7 +325,7 @@ function loadFinancialSummary() {
             console.error('Error loading budget summary:', error);
         });
 
-    fetch('/summaries/bill/summary')
+    fetch(window.apiUrls.billSummary)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -481,7 +343,7 @@ function loadFinancialSummary() {
             console.error('Error loading bill summary:', error);
         });
 
-    fetch('/summaries/shopping/summary')
+    fetch(window.apiUrls.shoppingSummary)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -499,7 +361,7 @@ function loadFinancialSummary() {
             console.error('Error loading shopping summary:', error);
         });
 
-    fetch('/summaries/ficore_balance')
+    fetch(window.apiUrls.ficoreBalance)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -516,5 +378,166 @@ function loadFinancialSummary() {
             console.error('Error loading ficore balance:', error);
         });
 }
+
+function loadRecentActivity() {
+    const container = document.getElementById('recentActivityListLimited');
+    const fullContainer = document.getElementById('recentActivityListFull');
+    if (!container || !fullContainer) return;
+
+    container.innerHTML = `
+        <div class="personal-recent-activity-item">
+            <div class="personal-activity-content-placeholder">
+                <div class="personal-activity-description fw-semibold">${window.t('loading', { default: 'Ana loda...' })}</div>
+            </div>
+        </div>
+    `;
+    fullContainer.innerHTML = container.innerHTML;
+
+    fetch('{{ url_for("dashboard.api_recent_activity") }}')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.recent_transactions && data.recent_transactions.length > 0) {
+                updateRecentActivityDisplay(data.recent_transactions);
+            } else {
+                const noActivityHtml = `
+                    <div class="personal-recent-activity-item personal-no-activity">
+                        <div class="personal-activity-icon-wrapper">
+                            <i class="bi bi-info-circle text-muted"></i>
+                        </div>
+                        <div class="personal-activity-content-placeholder">
+                            <div class="personal-activity-description fw-semibold">${window.t('no_recent_activity', { default: 'Babu ayyukan kwanan nan' })}</div>
+                            <div class="personal-activity-time text-muted">${window.t('start_activity_detailed', { default: 'Fara da ƙara kasafin kuɗi, biya kuɗin da ke jiran biya, ko sayen kayan da kuke buƙata don ganin ayyukanku' })}</div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML = noActivityHtml;
+                fullContainer.innerHTML = noActivityHtml;
+            }
+        })
+        .catch(error => {
+            console.error('Error refreshing recent activity:', error);
+            const errorMessage = error.message.includes('NetworkError') || error.message.includes('Failed to fetch')
+                ? window.t('network_error', { default: 'Kuskuren sadarwa' })
+                : window.t('error_loading_activities', { default: 'Kuskure wajen loda ayyukan' });
+            const errorHtml = `
+                <div class="personal-recent-activity-item personal-no-activity">
+                    <div class="personal-activity-icon-wrapper">
+                        <i class="bi bi-exclamation-triangle text-warning"></i>
+                    </div>
+                    <div class="personal-activity-content-placeholder">
+                        <div class="personal-activity-description fw-semibold">${errorMessage}</div>
+                        <div class="personal-activity-time text-muted">${window.t('try_again_later', { default: 'Sake gwadawa daga baya' })}</div>
+                        </div>
+                </div>
+            `;
+            container.innerHTML = errorHtml;
+            fullContainer.innerHTML = errorHtml;
+        });
+}
+
+function updateRecentActivityDisplay(transactions) {
+    const container = document.getElementById('recentActivityListLimited');
+    const fullContainer = document.getElementById('recentActivityListFull');
+    if (!container || !fullContainer) return;
+
+    let html = '';
+    transactions.slice(0, 3).forEach(transaction => {
+        const isIncome = transaction.type === 'income';
+        const icon = isIncome ? 'bi-arrow-up-circle text-success' : 'bi-arrow-down-circle text-danger';
+        const amountClass = isIncome ? 'text-success' : 'text-danger';
+        const amountPrefix = isIncome ? '+' : '-';
+        
+        html += `
+            <div class="personal-recent-activity-item">
+                <div class="personal-activity-icon-wrapper">
+                    <i class="bi ${icon}"></i>
+                </div>
+                <div class="personal-activity-content">
+                    <div class="personal-activity-description fw-semibold">
+                        ${transaction.description}
+                        <span class="badge bg-secondary ms-2">${transaction.category}</span>
+                    </div>
+                    <div class="personal-activity-time text-muted d-flex justify-content-between">
+                        <span>${formatTimeAgo(transaction.timestamp)}</span>
+                        <span class="fw-bold ${amountClass}">
+                            ${amountPrefix}${transaction.formatted_amount}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+    
+    // For full container, render all transactions
+    let fullHtml = '';
+    transactions.forEach(transaction => {
+        const isIncome = transaction.type === 'income';
+        const icon = isIncome ? 'bi-arrow-up-circle text-success' : 'bi-arrow-down-circle text-danger';
+        const amountClass = isIncome ? 'text-success' : 'text-danger';
+        const amountPrefix = isIncome ? '+' : '-';
+        
+        fullHtml += `
+            <div class="personal-recent-activity-item">
+                <div class="personal-activity-icon-wrapper">
+                    <i class="bi ${icon}"></i>
+                </div>
+                <div class="personal-activity-content">
+                    <div class="personal-activity-description fw-semibold">
+                        ${transaction.description}
+                        <span class="badge bg-secondary ms-2">${transaction.category}</span>
+                    </div>
+                    <div class="personal-activity-time text-muted d-flex justify-content-between">
+                        <span>${formatTimeAgo(transaction.timestamp)}</span>
+                        <span class="fw-bold ${amountClass}">
+                            ${amountPrefix}${transaction.formatted_amount}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    fullContainer.innerHTML = fullHtml;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof bootstrap === 'undefined') {
+        console.error('Bootstrap JavaScript is not loaded');
+    } else {
+        console.log('Bootstrap JavaScript loaded successfully');
+    }
+
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipTriggerEl => {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    document.querySelectorAll('.bi').forEach(icon => {
+        if (!icon.className.includes('bi-')) {
+            console.warn('Invalid or missing Bootstrap Icon class:', icon.className);
+        }
+    });
+
+    loadFinancialSummary();
+    loadRecentActivity();
+
+    document.querySelectorAll('.personal-quick-action-item, .personal-service-grid-item').forEach(card => {
+        card.addEventListener('click', () => {
+            card.classList.add('animate-click');
+            setTimeout(() => {
+                card.classList.remove('animate-click');
+            }, 200);
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        });
+    });
+});
 </script>
 {% endblock %}
