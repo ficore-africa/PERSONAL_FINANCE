@@ -4,7 +4,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, FloatField, SelectField, TextAreaField, DateField, SubmitField
 from wtforms.validators import DataRequired, NumberRange
 from translations import trans
-from utils import get_mongo_db, logger
+from utils import get_mongo_db, logger, format_date, format_currency  # Updated import
 from models import create_transaction, get_transactions
 from datetime import datetime
 
@@ -68,7 +68,7 @@ def index():
                 db=db,
                 user_id=str(current_user.id),
                 transaction_type=form.type.data,
-                category=form.category.data,
+                category=form.category.data,  # Fixed from form.type.data
                 amount=float(form.amount.data),
                 description=form.description.data,
                 session_id=session.get('sid', 'tracking-session'),
@@ -107,8 +107,8 @@ def history(transaction_type):
                 'category': t['category'],
                 'amount': t['amount'],
                 'description': t['description'],
-                'timestamp': utils.format_date(t['timestamp']),
-                'formatted_amount': utils.format_currency(t['amount'])
+                'timestamp': format_date(t['timestamp'], format_type='short'),  # Explicitly specify format_type
+                'formatted_amount': format_currency(t['amount'], currency='₦', include_symbol=True)  # Specify currency
             } for t in transactions
         ]
         title = trans('tracking_income_history', default='Income History') if transaction_type == 'income' else trans('tracking_expense_history', default='Expense History')
