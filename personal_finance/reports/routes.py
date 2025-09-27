@@ -10,11 +10,12 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from io import BytesIO
 from flask_wtf import FlaskForm
-from wtforms import DateField, SubmitField
+from wtforms import DateField, SubmitField, SelectField
 from wtforms.validators import Optional
 import logging
 from helpers.branding_helpers import draw_ficore_pdf_header
 from utils import logger
+from models import get_transactions
 
 reports_bp = Blueprint('reports', __name__, url_prefix='/reports')
 
@@ -35,6 +36,20 @@ class ShoppingReportForm(FlaskForm):
     start_date = DateField(trans('reports_start_date', default='Start Date'), validators=[Optional()])
     end_date = DateField(trans('reports_end_date', default='End Date'), validators=[Optional()])
     format = SelectField(trans('reports_format', default='Format'), choices=[('pdf', 'PDF'), ('html', 'HTML')], validators=[Optional()])
+    submit = SubmitField(trans('reports_generate_report', default='Generate Report'))
+
+class TransactionReportForm(FlaskForm):
+    start_date = DateField(trans('reports_start_date', default='Start Date'), validators=[Optional()])
+    end_date = DateField(trans('reports_end_date', default='End Date'), validators=[Optional()])
+    transaction_type = SelectField(
+        trans('tracking_type', default='Transaction Type'),
+        choices=[
+            ('all', trans('tracking_all', default='All')),
+            ('income', trans('tracking_income', default='Income')),
+            ('expense', trans('tracking_expense', default='Expense'))
+        ],
+        validators=[Optional()]
+    )
     submit = SubmitField(trans('reports_generate_report', default='Generate Report'))
 
 def to_dict_budget(record):
@@ -119,6 +134,20 @@ def to_dict_shopping_suggestion(record):
         'updated_at': utils.format_date(record.get('updated_at'), format_type='iso') if record.get('updated_at') else None
     }
 
+def to_dict_transaction(record):
+    if not record:
+        return {'amount': None, 'type': None}
+    return {
+        'id': str(record.get('_id', '')),
+        'type': record.get('type', ''),
+        'category': record.get('category', ''),
+        'amount': record.get('amount', 0),
+        'description': record.get('description', ''),
+        'timestamp': utils.format_date(record.get('timestamp'), format_type='iso'),
+        'status': record.get('status', ''),
+        'created_at': utils.format_date(record.get('created_at'), format_type='iso')
+    }
+
 @reports_bp.route('/')
 @login_required
 @utils.requires_role(['personal', 'admin'])
@@ -159,7 +188,7 @@ def budget_performance():
                 budget_query['created_at'] = budget_query.get('created_at', {}) | {'$lte': end_datetime}
                 cashflow_query['created_at'] = cashflow_query.get('created_at', {}) | {'$lte': end_datetime}
             budgets = list(db.budgets.find(budget_query).sort('created_at', -1))
-            cashflows = [utils.to_dict_cashflow(cf) for cf in db.cashflows.find(cashflow_query).sort('created_at', -1)]
+            cashflows = [utils.to_dict_cashflow(cf) for cf in db.cashflows.find(cashflow_query).sort('created_at', -1))
             for budget in budgets:
                 budget_dict = to_dict_budget(budget)
                 actual_income = sum(cf['amount'] for cf in cashflows if cf['type'] == 'receipt')
@@ -177,7 +206,7 @@ def budget_performance():
         try:
             db = utils.get_mongo_db()
             budgets = list(db.budgets.find(query).sort('created_at', -1))
-            cashflows = [utils.to_dict_cashflow(cf) for cf in db.cashflows.find(query).sort('created_at', -1)]
+            cashflows = [utils.to_dict_cashflow(cf) for cf in db.cashflows.find(query).sort('created_at', -1))
             for budget in budgets:
                 budget_dict = to_dict_budget(budget)
                 actual_income = sum(cf['amount'] for cf in cashflows if cf['type'] == 'receipt')
@@ -224,8 +253,8 @@ def shopping_report():
                 list_query['created_at'] = list_query.get('created_at', {}) | {'$lte': end_datetime}
                 item_query['created_at'] = item_query.get('created_at', {}) | {'$lte': end_datetime}
                 suggestion_query['created_at'] = suggestion_query.get('created_at', {}) | {'$lte': end_datetime}
-            lists = [to_dict_shopping_list(lst) for lst in db.shopping_lists.find(list_query).sort('created_at', -1)]
-            items = [to_dict_shopping_item(item) for item in db.shopping_items.find(item_query).sort('created_at', -1)]
+            lists = [to_dict_shopping_list(lst) for lst in db.shopping_lists.find(list_query).sort('created_at', -1))
+            items = [to_dict_shopping_item(item) for item in db.shopping_items.find(item_query).sort('created_at', -1))
             suggestions = [to_dict_shopping_suggestion(sug) for sug in db.shopping_suggestions.find(suggestion_query).sort('created_at', -1)]
             shopping_data = {'lists': lists, 'items': items, 'suggestions': suggestions}
             if form.format.data == 'pdf':
@@ -243,8 +272,8 @@ def shopping_report():
     else:
         try:
             db = utils.get_mongo_db()
-            lists = [to_dict_shopping_list(lst) for lst in db.shopping_lists.find(query).sort('created_at', -1)]
-            items = [to_dict_shopping_item(item) for item in db.shopping_items.find(query).sort('created_at', -1)]
+            lists = [to_dict_shopping_list(lst) for lst in db.shopping_lists.find(query).sort('created_at', -1))
+            items = [to_dict_shopping_item(item) for item in db.shopping_items.find(query).sort('created_at', -1))
             suggestions = [to_dict_shopping_suggestion(sug) for sug in db.shopping_suggestions.find(query).sort('created_at', -1)]
             shopping_data = {'lists': lists, 'items': items, 'suggestions': suggestions}
         except Exception as e:
@@ -256,7 +285,97 @@ def shopping_report():
         shopping_data=shopping_data,
         title=utils.trans('reports_shopping', default='Shopping Report', lang=session.get('lang', 'en'))
     )
-    
+
+@reports_bp.route('/transactions', methods=['GET', 'POST'])
+@login_required
+@utils.requires_role(['personal', 'admin'])
+def transaction_report():
+    """Generate transaction report with filters."""
+    form = TransactionReportForm()
+    if not utils.is_admin() and not utils.check_ficore_credit_balance(1):
+        flash(trans('debtors_insufficient_credits', default='Insufficient credits to generate a report. Request more credits.'), 'danger')
+        return redirect(url_for('credits.request_credits'))
+    transactions = []
+    query = {} if utils.is_admin() else {'user_id': str(current_user.id), 'status': 'completed'}
+    if form.validate_on_submit():
+        try:
+            db = utils.get_mongo_db()
+            transaction_query = query.copy()
+            if form.start_date.data:
+                start_datetime = datetime.combine(form.start_date.data, datetime.min.time())
+                transaction_query['timestamp'] = {'$gte': start_datetime}
+            if form.end_date.data:
+                end_datetime = datetime.combine(form.end_date.data, datetime.max.time())
+                transaction_query['timestamp'] = transaction_query.get('timestamp', {}) | {'$lte': end_datetime}
+            if form.transaction_type.data != 'all':
+                transaction_query['type'] = form.transaction_type.data
+            transactions = [to_dict_transaction(t) for t in get_transactions(db, transaction_query, limit=1000)]
+            return generate_transaction_report_pdf(transactions)
+        except Exception as e:
+            logger.error(f"Error generating transaction report for user {current_user.id}: {str(e)}", exc_info=True)
+            flash(trans('reports_generation_error', default='An error occurred'), 'danger')
+    else:
+        try:
+            db = utils.get_mongo_db()
+            transactions = [to_dict_transaction(t) for t in get_transactions(db, query, limit=1000)]
+        except Exception as e:
+            logger.error(f"Error fetching transaction data for user {current_user.id}: {str(e)}", exc_info=True)
+            flash(trans('reports_generation_error', default='An error occurred'), 'danger')
+    return render_template(
+        'reports/transactions.html',
+        form=form,
+        transactions=transactions,
+        title=utils.trans('reports_transaction_report', default='Transaction Report', lang=session.get('lang', 'en'))
+    )
+
+@reports_bp.route('/net_income', methods=['GET', 'POST'])
+@login_required
+@utils.requires_role(['personal', 'admin'])
+def net_income_report():
+    """Generate net income report with filters."""
+    form = ReportForm()
+    if not utils.is_admin() and not utils.check_ficore_credit_balance(1):
+        flash(trans('debtors_insufficient_credits', default='Insufficient credits to generate a report. Request more credits.'), 'danger')
+        return redirect(url_for('credits.request_credits'))
+    transactions = []
+    net_income_data = {'income': 0, 'expenses': 0, 'net_income': 0}
+    query = {} if utils.is_admin() else {'user_id': str(current_user.id), 'status': 'completed'}
+    if form.validate_on_submit():
+        try:
+            db = utils.get_mongo_db()
+            transaction_query = query.copy()
+            if form.start_date.data:
+                start_datetime = datetime.combine(form.start_date.data, datetime.min.time())
+                transaction_query['timestamp'] = {'$gte': start_datetime}
+            if form.end_date.data:
+                end_datetime = datetime.combine(form.end_date.data, datetime.max.time())
+                transaction_query['timestamp'] = transaction_query.get('timestamp', {}) | {'$lte': end_datetime}
+            transactions = [to_dict_transaction(t) for t in get_transactions(db, transaction_query, limit=1000)]
+            income = sum(t['amount'] for t in transactions if t['type'] == 'income')
+            expenses = sum(t['amount'] for t in transactions if t['type'] == 'expense')
+            net_income_data = {'income': income, 'expenses': expenses, 'net_income': income - expenses}
+            return generate_net_income_report_pdf(net_income_data, transactions, form.start_date.data, form.end_date.data)
+        except Exception as e:
+            logger.error(f"Error generating net income report for user {current_user.id}: {str(e)}", exc_info=True)
+            flash(trans('reports_generation_error', default='An error occurred'), 'danger')
+    else:
+        try:
+            db = utils.get_mongo_db()
+            transactions = [to_dict_transaction(t) for t in get_transactions(db, query, limit=1000)]
+            income = sum(t['amount'] for t in transactions if t['type'] == 'income')
+            expenses = sum(t['amount'] for t in transactions if t['type'] == 'expense')
+            net_income_data = {'income': income, 'expenses': expenses, 'net_income': income - expenses}
+        except Exception as e:
+            logger.error(f"Error fetching net income data for user {current_user.id}: {str(e)}", exc_info=True)
+            flash(trans('reports_generation_error', default='An error occurred'), 'danger')
+    return render_template(
+        'reports/net_income.html',
+        form=form,
+        net_income_data=net_income_data,
+        transactions=transactions,
+        title=utils.trans('reports_net_income_report', default='Net Income Report', lang=session.get('lang', 'en'))
+    )
+
 @reports_bp.route('/admin/customer-reports', methods=['GET', 'POST'])
 @login_required
 @utils.requires_role('admin')
@@ -656,3 +775,185 @@ def generate_customer_report_pdf(report_data):
     p.save()
     buffer.seek(0)
     return Response(buffer, mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=customer_report.pdf'})
+
+def generate_transaction_report_pdf(transactions):
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+    # Page setup
+    header_height = 0.7
+    extra_space = 0.2
+    row_height = 0.3
+    bottom_margin = 0.5
+    max_y = 10.5
+    title_y = max_y - header_height - extra_space
+    page_height = (max_y - bottom_margin) * inch
+    rows_per_page = int((page_height - (title_y - 0.6) * inch) / (row_height * inch))
+
+    def draw_table_headers(y):
+        p.setFont("Helvetica", 10)
+        headers = [
+            trans('general_date', default='Date'),
+            trans('tracking_type', default='Type'),
+            trans('tracking_category', default='Category'),
+            trans('tracking_amount', default='Amount'),
+            trans('tracking_description', default='Description')
+        ]
+        x_positions = [1 * inch, 2 * inch, 3 * inch, 4 * inch, 5 * inch]
+        for header, x in zip(headers, x_positions):
+            p.drawString(x, y * inch, header)
+        return y - row_height, x_positions
+
+    # Initialize first page
+    draw_ficore_pdf_header(p, current_user, y_start=max_y)
+    p.setFont("Helvetica", 12)
+    p.drawString(1 * inch, title_y * inch, trans('reports_transaction_report', default='Transaction Report'))
+    p.drawString(1 * inch, (title_y - 0.3) * inch, f"{trans('reports_generated_on', default='Generated on')}: {utils.format_date(datetime.utcnow())}")
+    y = title_y - 0.6
+    y, x_positions = draw_table_headers(y)
+
+    row_count = 0
+    total_income = 0
+    total_expenses = 0
+    for t in transactions:
+        if row_count >= rows_per_page:
+            p.showPage()
+            draw_ficore_pdf_header(p, current_user, y_start=max_y)
+            y = title_y - 0.6
+            y, x_positions = draw_table_headers(y)
+            row_count = 0
+
+        values = [
+            utils.format_date(t['timestamp']),
+            trans(f"tracking_{t['type']}", default=t['type'].capitalize()),
+            t['category'],
+            utils.format_currency(t['amount']),
+            t['description'][:30]
+        ]
+        for value, x in zip(values, x_positions):
+            p.drawString(x, y * inch, value)
+        if t['type'] == 'income':
+            total_income += t['amount']
+        else:
+            total_expenses += t['amount']
+        y -= row_height
+        row_count += 1
+
+    if row_count + 2 <= rows_per_page:
+        y -= row_height
+        p.drawString(x_positions[0], y * inch, f"{trans('tracking_total_income', default='Total Income')}: {utils.format_currency(total_income)}")
+        y -= row_height
+        p.drawString(x_positions[0], y * inch, f"{trans('tracking_total_expenses', default='Total Expenses')}: {utils.format_currency(total_expenses)}")
+    else:
+        p.showPage()
+        draw_ficore_pdf_header(p, current_user, y_start=max_y)
+        y = title_y - 0.6
+        p.drawString(x_positions[0], y * inch, f"{trans('tracking_total_income', default='Total Income')}: {utils.format_currency(total_income)}")
+        y -= row_height
+        p.drawString(x_positions[0], y * inch, f"{trans('tracking_total_expenses', default='Total Expenses')}: {utils.format_currency(total_expenses)}")
+
+    p.save()
+    buffer.seek(0)
+    return Response(buffer, mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=transaction_report.pdf'})
+
+def generate_net_income_report_pdf(net_income_data, transactions, start_date, end_date):
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+    # Page setup
+    header_height = 0.7
+    extra_space = 0.2
+    row_height = 0.3
+    section_space = 0.5
+    bottom_margin = 0.5
+    max_y = 10.5
+    title_y = max_y - header_height - extra_space
+    page_height = (max_y - bottom_margin) * inch
+    rows_per_page = int((page_height - (title_y - 0.6) * inch) / (row_height * inch))
+
+    def draw_summary_headers(y):
+        p.setFont("Helvetica", 10)
+        headers = [
+            trans('tracking_total_income', default='Total Income'),
+            trans('tracking_total_expenses', default='Total Expenses'),
+            trans('tracking_net_income', default='Net Income')
+        ]
+        x_positions = [1 * inch, 3 * inch, 5 * inch]
+        for header, x in zip(headers, x_positions):
+            p.drawString(x, y * inch, header)
+        return y - row_height, x_positions
+
+    def draw_transaction_headers(y):
+        p.setFont("Helvetica", 10)
+        headers = [
+            trans('general_date', default='Date'),
+            trans('tracking_type', default='Type'),
+            trans('tracking_category', default='Category'),
+            trans('tracking_amount', default='Amount'),
+            trans('tracking_description', default='Description')
+        ]
+        x_positions = [1 * inch, 2 * inch, 3 * inch, 4 * inch, 5 * inch]
+        for header, x in zip(headers, x_positions):
+            p.drawString(x, y * inch, header)
+        return y - row_height, x_positions
+
+    # Initialize first page
+    draw_ficore_pdf_header(p, current_user, y_start=max_y)
+    p.setFont("Helvetica", 12)
+    p.drawString(1 * inch, title_y * inch, trans('reports_net_income_report', default='Net Income Report'))
+    date_range = f"{utils.format_date(start_date) if start_date else 'All Time'} - {utils.format_date(end_date) if end_date else 'All Time'}"
+    p.drawString(1 * inch, (title_y - 0.3) * inch, f"{trans('reports_date_range', default='Date Range')}: {date_range}")
+    p.drawString(1 * inch, (title_y - 0.6) * inch, f"{trans('reports_generated_on', default='Generated on')}: {utils.format_date(datetime.utcnow())}")
+    y = title_y - 0.9
+
+    # Summary Section
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(1 * inch, y * inch, trans('reports_summary', default='Summary'))
+    y -= row_height
+    y, x_positions = draw_summary_headers(y)
+    values = [
+        utils.format_currency(net_income_data['income']),
+        utils.format_currency(net_income_data['expenses']),
+        utils.format_currency(net_income_data['net_income'])
+    ]
+    for value, x in zip(values, x_positions):
+        p.drawString(x, y * inch, value)
+    y -= section_space
+    row_count = 2
+
+    # Transactions Section
+    if row_count + 3 >= rows_per_page:
+        p.showPage()
+        draw_ficore_pdf_header(p, current_user, y_start=max_y)
+        y = title_y - 0.6
+        row_count = 0
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(1 * inch, y * inch, trans('tracking_transactions', default='Transactions'))
+    y -= row_height
+    y, x_positions = draw_transaction_headers(y)
+    row_count += 2
+
+    for t in transactions:
+        if row_count >= rows_per_page:
+            p.showPage()
+            draw_ficore_pdf_header(p, current_user, y_start=max_y)
+            y = title_y - 0.6
+            p.setFont("Helvetica-Bold", 12)
+            p.drawString(1 * inch, y * inch, trans('tracking_transactions', default='Transactions'))
+            y -= row_height
+            y, x_positions = draw_transaction_headers(y)
+            row_count = 0
+
+        values = [
+            utils.format_date(t['timestamp']),
+            trans(f"tracking_{t['type']}", default=t['type'].capitalize()),
+            t['category'],
+            utils.format_currency(t['amount']),
+            t['description'][:30]
+        ]
+        for value, x in zip(values, x_positions):
+            p.drawString(x, y * inch, value)
+        y -= row_height
+        row_count += 1
+
+    p.save()
+    buffer.seek(0)
+    return Response(buffer, mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=net_income_report.pdf'})
