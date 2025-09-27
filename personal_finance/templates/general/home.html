@@ -79,6 +79,20 @@
             </div>
         </section>
 
+        <section class="personal-section-card personal-tools-grid-section">
+            <h3 class="personal-section-title">{{ t('explore_all_tools', default='Explore All Tools') }}</h3>
+            <div class="personal-services-grid">
+                {% for tool in tools_for_template %}
+                    <a href="{{ tool.url | e }}" class="personal-service-grid-item text-decoration-none" aria-label="{{ t(tool.label_key, default=tool.label) | e }}">
+                        <div class="personal-service-icon-wrapper">
+                            <i class="bi {{ tool.icon | e }}"></i>
+                        </div>
+                        <div class="personal-service-label">{{ t(tool.label_key, default=tool.label) | e }}</div>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+
         <section class="personal-section-card personal-financial-snapshots-overview">
             <h3 class="personal-section-title">{{ t('finance_snapshots', default='Bayanan Kuɗaɗe') }}</h3>
             <div class="personal-snapshots-summary-grid">
@@ -118,16 +132,13 @@
         <section class="personal-section-card personal-services-grid-section">
             <h3 class="personal-section-title">{{ t('explore_features', default='Bincika Abubuwan Haɗin') }}</h3>
             <div class="personal-services-grid">
-                {% set allowed_features = ['Budget', 'Bills', 'Shopping'] %}
                 {% for feature in explore_features_for_template %}
-                    {% if feature.label in allowed_features %}
                     <a href="{{ feature.url | e }}" class="personal-service-grid-item text-decoration-none" aria-label="{{ t(feature.label_key, default=feature.label) | e }}">
                         <div class="personal-service-icon-wrapper">
                             <i class="bi {{ feature.icon | e }}"></i>
                         </div>
                         <div class="personal-service-label">{{ t(feature.label_key, default=feature.label) | e }}</div>
                     </a>
-                    {% endif %}
                 {% endfor %}
             </div>
         </section>
