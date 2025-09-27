@@ -96,6 +96,30 @@ _PERSONAL_TOOLS = [
         "tooltip_key": "shopping_tooltip",
         "icon": "bi-cart"
     },
+    {
+        "endpoint": "reports.index",
+        "label": "Reports",
+        "label_key": "reports_index",
+        "description_key": "reports_index_desc",
+        "tooltip_key": "reports_index_tooltip",
+        "icon": "bi-file-earmark-text"
+    },
+    {
+        "endpoint": "reports.budget_performance",
+        "label": "Budget Performance Report",
+        "label_key": "reports_budget_performance",
+        "description_key": "reports_budget_performance_desc",
+        "tooltip_key": "reports_budget_performance_tooltip",
+        "icon": "bi-graph-up"
+    },
+    {
+        "endpoint": "reports.shopping_report",
+        "label": "Shopping Report",
+        "label_key": "reports_shopping",
+        "description_key": "reports_shopping_desc",
+        "tooltip_key": "reports_shopping_tooltip",
+        "icon": "bi-cart-check"
+    },
 ]
 
 _PERSONAL_NAV = [
@@ -132,6 +156,14 @@ _PERSONAL_NAV = [
         "icon": "bi-cart"
     },
     {
+        "endpoint": "reports.index",
+        "label": "Reports",
+        "label_key": "reports_index",
+        "description_key": "reports_index_desc",
+        "tooltip_key": "reports_index_tooltip",
+        "icon": "bi-file-earmark-text"
+    },
+    {
         "endpoint": "settings.profile",
         "label": "Profile",
         "label_key": "profile_settings",
@@ -166,6 +198,22 @@ _PERSONAL_EXPLORE_FEATURES = [
         "tooltip_key": "shopping_tooltip",
         "icon": "bi-cart"
     },
+    {
+        "endpoint": "reports.budget_performance",
+        "label": "Budget Performance Report",
+        "label_key": "reports_budget_performance",
+        "description_key": "reports_budget_performance_desc",
+        "tooltip_key": "reports_budget_performance_tooltip",
+        "icon": "bi-graph-up"
+    },
+    {
+        "endpoint": "reports.shopping_report",
+        "label": "Shopping Report",
+        "label_key": "reports_shopping",
+        "description_key": "reports_shopping_desc",
+        "tooltip_key": "reports_shopping_tooltip",
+        "icon": "bi-cart-check"
+    },
 ]
 
 _ADMIN_TOOLS = [
@@ -184,6 +232,22 @@ _ADMIN_TOOLS = [
         "description_key": "admin_manage_users_desc",
         "tooltip_key": "admin_manage_users_tooltip",
         "icon": "bi-people"
+    },
+    {
+        "endpoint": "reports.index",
+        "label": "Reports",
+        "label_key": "reports_index",
+        "description_key": "reports_index_desc",
+        "tooltip_key": "reports_index_tooltip",
+        "icon": "bi-file-earmark-text"
+    },
+    {
+        "endpoint": "reports.customer_reports",
+        "label": "Customer Reports",
+        "label_key": "reports_customer_report",
+        "description_key": "reports_customer_report_desc",
+        "tooltip_key": "reports_customer_report_tooltip",
+        "icon": "bi-person-lines-fill"
     },
 ]
 
@@ -220,6 +284,22 @@ _ADMIN_NAV = [
         "tooltip_key": "admin_manage_bills_tooltip",
         "icon": "bi-receipt"
     },
+    {
+        "endpoint": "reports.index",
+        "label": "Reports",
+        "label_key": "reports_index",
+        "description_key": "reports_index_desc",
+        "tooltip_key": "reports_index_tooltip",
+        "icon": "bi-file-earmark-text"
+    },
+    {
+        "endpoint": "reports.customer_reports",
+        "label": "Customer Reports",
+        "label_key": "reports_customer_report",
+        "description_key": "reports_customer_report_desc",
+        "tooltip_key": "reports_customer_report_tooltip",
+        "icon": "bi-person-lines-fill"
+    },
 ]
 
 _ADMIN_EXPLORE_FEATURES = [
@@ -254,6 +334,22 @@ _ADMIN_EXPLORE_FEATURES = [
         "description_key": "admin_manage_bills_desc",
         "tooltip_key": "admin_manage_bills_tooltip",
         "icon": "bi-receipt"
+    },
+    {
+        "endpoint": "reports.budget_performance",
+        "label": "Budget Performance Report",
+        "label_key": "reports_budget_performance",
+        "description_key": "reports_budget_performance_desc",
+        "tooltip_key": "reports_budget_performance_tooltip",
+        "icon": "bi-graph-up"
+    },
+    {
+        "endpoint": "reports.customer_reports",
+        "label": "Customer Reports",
+        "label_key": "reports_customer_report",
+        "description_key": "reports_customer_report_desc",
+        "tooltip_key": "reports_customer_report_tooltip",
+        "icon": "bi-person-lines-fill"
     },
 ]
 
