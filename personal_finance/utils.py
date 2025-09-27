@@ -73,14 +73,6 @@ _PERSONAL_TOOLS = [
         "icon": "bi-speedometer2"
     },
     {
-        "endpoint": "budget.index",
-        "label": "Budget",
-        "label_key": "budget_budget_planner",
-        "description_key": "budget_budget_desc",
-        "tooltip_key": "budget_tooltip",
-        "icon": "bi-wallet"
-    },
-    {
         "endpoint": "tracking.index",
         "label": "Track",
         "label_key": "tracking_index",
@@ -89,36 +81,12 @@ _PERSONAL_TOOLS = [
         "icon": "bi-pencil-square"
     },
     {
-        "endpoint": "bill.index",
-        "label": "Bills",
-        "label_key": "bill_bill_planner",
-        "description_key": "bill_bill_desc",
-        "tooltip_key": "bill_tooltip",
-        "icon": "bi-receipt"
-    },
-    {
-        "endpoint": "shopping.index",
-        "label": "Shopping",
-        "label_key": "shopping_management",
-        "description_key": "shopping_management_desc",
-        "tooltip_key": "shopping_tooltip",
-        "icon": "bi-cart"
-    },
-    {
         "endpoint": "reports.index",
         "label": "Reports",
         "label_key": "reports_index",
         "description_key": "reports_index_desc",
         "tooltip_key": "reports_index_tooltip",
         "icon": "bi-file-earmark-text"
-    },
-    {
-        "endpoint": "reports.shopping_report",
-        "label": "Shopping Report",
-        "label_key": "reports_shopping",
-        "description_key": "reports_shopping_desc",
-        "tooltip_key": "reports_shopping_tooltip",
-        "icon": "bi-cart-check"
     },
 ]
 
