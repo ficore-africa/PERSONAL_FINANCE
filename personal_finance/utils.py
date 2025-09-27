@@ -159,14 +159,6 @@ _PERSONAL_EXPLORE_FEATURES = [
         "icon": "bi-pencil-square"
     },
     {
-        'endpoint': 'tracking.history',
-        'label': 'Transaction History',
-        'label_key': 'tracking_history',
-        'description_key': 'tracking_history_desc',
-        'tooltip_key': 'tracking_history_tooltip',
-        'icon': 'bi-clock-history'
-    },
-    {
         "endpoint": "bill.index",
         "label": "Bills",
         "label_key": "bill_bill_planner",
