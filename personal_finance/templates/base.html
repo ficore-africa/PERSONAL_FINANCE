@@ -30,8 +30,6 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body class="{% if session.get('dark_mode', False) %}dark-mode{% endif %}">
-    <!-- Online/Offline Status Indicator -->
-    <div id="online-status" class="status-indicator online">Online</div>
     
     <!-- Offline Notice Banner -->
     <div id="offline-notice" class="offline-notice">
@@ -101,7 +99,7 @@
                     {% else %}
                         <li class="nav-item">
                             <div class="language-buttons d-flex">
-                                <button class="nav-link btn btn-link language-btn {% if current_lang == 'en' %}active{% endif %}" id="navLangEnBtn" onclick="setLanguage('en')" data-bs-toggle="tooltip" data-bs-title="{{ t('general_language_english', default='Switch to English') | e }}">EN</button>
+                                <button class="nav-link btn btn-link language-btn {% if current_lang == 'en' %}active{% endif %}" id="navLangEnBtn" onclick="setLanguage('en')" data-bs-toggle="tooltip" data-bs-toggle="tooltip" data-bs-title="{{ t('general_language_english', default='Switch to English') | e }}">EN</button>
                                 <button class="nav-link btn btn-link language-btn {% if current_lang == 'ha' %}active{% endif %}" id="navLangHaBtn" onclick="setLanguage('ha')" data-bs-toggle="tooltip" data-bs-title="{{ t('general_language_hausa', default='Switch to Hausa') | e }}">HA</button>
                             </div>
                         </li>
@@ -296,15 +294,25 @@
         }
         .dynamic-nav {
             position: sticky;
-            top: 60px; /* Adjust based on fintech-top-header height */
+            top: 0;
             z-index: 900;
-            display: none;
+            opacity: 0;
+            transform: translateY(-100%);
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
         .dynamic-nav.visible {
-            display: block;
             opacity: 1;
             transform: translateY(0);
+        }
+        @media (max-width: 991.98px) {
+            .dynamic-nav {
+                top: 60px; /* Position below top header on mobile */
+                z-index: 900;
+                display: none;
+            }
+            .dynamic-nav.visible {
+                display: block;
+            }
         }
         @media (min-width: 992px) {
             .app-logo {
@@ -314,8 +322,14 @@
             .fintech-top-header {
                 padding: 15px 30px;
             }
+            .fintech-top-header.hidden {
+                opacity: 0;
+                transform: translateY(-100%);
+                pointer-events: none;
+            }
             .dynamic-nav {
-                top: 70px; /* Adjust for larger header on desktop */
+                top: 0;
+                z-index: 1000;
             }
         }
     </style>
@@ -554,13 +568,25 @@
             // Header and dynamic nav scroll behavior
             const header = document.querySelector('.fintech-top-header');
             const dynamicNav = document.querySelector('.dynamic-nav');
+            const isDesktop = window.matchMedia('(min-width: 992px)').matches;
+
             window.addEventListener('scroll', function() {
                 if (window.scrollY > 50) {
-                    header.classList.add('scrolled');
-                    dynamicNav.classList.add('visible');
+                    if (isDesktop) {
+                        header.classList.add('hidden');
+                        dynamicNav.classList.add('visible');
+                    } else {
+                        header.classList.add('scrolled');
+                        dynamicNav.classList.add('visible');
+                    }
                 } else {
-                    header.classList.remove('scrolled');
-                    dynamicNav.classList.remove('visible');
+                    if (isDesktop) {
+                        header.classList.remove('hidden');
+                        dynamicNav.classList.remove('visible');
+                    } else {
+                        header.classList.remove('scrolled');
+                        dynamicNav.classList.remove('visible');
+                    }
                 }
             });
 
