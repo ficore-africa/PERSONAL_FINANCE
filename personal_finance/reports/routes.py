@@ -206,7 +206,7 @@ def budget_performance():
         try:
             db = utils.get_mongo_db()
             budgets = list(db.budgets.find(query).sort('created_at', -1))
-            cashflows = [utils.to_dict_cashflow(cf) for cf in db.cashflows.find(query).sort('created_at', -1))
+            cashflows = [utils.to_dict_cashflow(cf) for cf in db.cashflows.find(query).sort('created_at', -1)]
             for budget in budgets:
                 budget_dict = to_dict_budget(budget)
                 actual_income = sum(cf['amount'] for cf in cashflows if cf['type'] == 'receipt')
@@ -253,8 +253,8 @@ def shopping_report():
                 list_query['created_at'] = list_query.get('created_at', {}) | {'$lte': end_datetime}
                 item_query['created_at'] = item_query.get('created_at', {}) | {'$lte': end_datetime}
                 suggestion_query['created_at'] = suggestion_query.get('created_at', {}) | {'$lte': end_datetime}
-            lists = [to_dict_shopping_list(lst) for lst in db.shopping_lists.find(list_query).sort('created_at', -1))
-            items = [to_dict_shopping_item(item) for item in db.shopping_items.find(item_query).sort('created_at', -1))
+            lists = [to_dict_shopping_list(lst) for lst in db.shopping_lists.find(list_query).sort('created_at', -1)]
+            items = [to_dict_shopping_item(item) for item in db.shopping_items.find(item_query).sort('created_at', -1)]
             suggestions = [to_dict_shopping_suggestion(sug) for sug in db.shopping_suggestions.find(suggestion_query).sort('created_at', -1)]
             shopping_data = {'lists': lists, 'items': items, 'suggestions': suggestions}
             if form.format.data == 'pdf':
@@ -272,8 +272,8 @@ def shopping_report():
     else:
         try:
             db = utils.get_mongo_db()
-            lists = [to_dict_shopping_list(lst) for lst in db.shopping_lists.find(query).sort('created_at', -1))
-            items = [to_dict_shopping_item(item) for item in db.shopping_items.find(query).sort('created_at', -1))
+            lists = [to_dict_shopping_list(lst) for lst in db.shopping_lists.find(query).sort('created_at', -1)]
+            items = [to_dict_shopping_item(item) for item in db.shopping_items.find(query).sort('created_at', -1)]
             suggestions = [to_dict_shopping_suggestion(sug) for sug in db.shopping_suggestions.find(query).sort('created_at', -1)]
             shopping_data = {'lists': lists, 'items': items, 'suggestions': suggestions}
         except Exception as e:
