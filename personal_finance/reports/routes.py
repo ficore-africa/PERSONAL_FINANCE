@@ -34,6 +34,7 @@ class BudgetPerformanceReportForm(FlaskForm):
 class ShoppingReportForm(FlaskForm):
     start_date = DateField(trans('reports_start_date', default='Start Date'), validators=[Optional()])
     end_date = DateField(trans('reports_end_date', default='End Date'), validators=[Optional()])
+    format = SelectField(trans('reports_format', default='Format'), choices=[('pdf', 'PDF'), ('html', 'HTML')], validators=[Optional()])
     submit = SubmitField(trans('reports_generate_report', default='Generate Report'))
 
 def to_dict_budget(record):
@@ -227,7 +228,15 @@ def shopping_report():
             items = [to_dict_shopping_item(item) for item in db.shopping_items.find(item_query).sort('created_at', -1)]
             suggestions = [to_dict_shopping_suggestion(sug) for sug in db.shopping_suggestions.find(suggestion_query).sort('created_at', -1)]
             shopping_data = {'lists': lists, 'items': items, 'suggestions': suggestions}
-            return generate_shopping_report_pdf(shopping_data)
+            if form.format.data == 'pdf':
+                return generate_shopping_report_pdf(shopping_data)
+            else:  # HTML or other formats
+                return render_template(
+                    'reports/shopping.html',
+                    form=form,
+                    shopping_data=shopping_data,
+                    title=utils.trans('reports_shopping', default='Shopping Report', lang=session.get('lang', 'en'))
+                )
         except Exception as e:
             logger.error(f"Error generating shopping report for user {current_user.id}: {str(e)}", exc_info=True)
             flash(trans('reports_generation_error', default='An error occurred'), 'danger')
@@ -247,7 +256,7 @@ def shopping_report():
         shopping_data=shopping_data,
         title=utils.trans('reports_shopping', default='Shopping Report', lang=session.get('lang', 'en'))
     )
-
+    
 @reports_bp.route('/admin/customer-reports', methods=['GET', 'POST'])
 @login_required
 @utils.requires_role('admin')
