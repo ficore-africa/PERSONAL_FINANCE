@@ -105,14 +105,6 @@ _PERSONAL_TOOLS = [
         "icon": "bi-file-earmark-text"
     },
     {
-        "endpoint": "reports.budget_performance",
-        "label": "Budget Performance Report",
-        "label_key": "reports_budget_performance",
-        "description_key": "reports_budget_performance_desc",
-        "tooltip_key": "reports_budget_performance_tooltip",
-        "icon": "bi-graph-up"
-    },
-    {
         "endpoint": "reports.shopping_report",
         "label": "Shopping Report",
         "label_key": "reports_shopping",
@@ -148,19 +140,11 @@ _PERSONAL_NAV = [
         "icon": "bi-wallet"
     },
     {
-        "endpoint": "shopping.index",
-        "label": "Shopping",
-        "label_key": "shopping_management",
-        "description_key": "shopping_management_desc",
-        "tooltip_key": "shopping_tooltip",
-        "icon": "bi-cart"
-    },
-    {
-        "endpoint": "reports.index",
-        "label": "Reports",
-        "label_key": "reports_index",
-        "description_key": "reports_index_desc",
-        "tooltip_key": "reports_index_tooltip",
+        "endpoint": "tracking.index",
+        "label": "Track",
+        "label_key": "tracking_index",
+        "description_key": "tracking_index_desc",
+        "tooltip_key": "tracking_index_tooltip",
         "icon": "bi-file-earmark-text"
     },
     {
@@ -181,6 +165,14 @@ _PERSONAL_EXPLORE_FEATURES = [
         "description_key": "budget_budget_desc",
         "tooltip_key": "budget_tooltip",
         "icon": "bi-wallet"
+    },  
+    {
+        "endpoint": "tracking.index",
+        "label": "Track",
+        "label_key": "tracking_index",
+        "description_key": "tracking_index_desc",
+        "tooltip_key": "tracking_index_tooltip",
+        "icon": "bi-file-earmark-text"
     },
     {
         "endpoint": "bill.index",
