@@ -50,11 +50,9 @@ translation_modules = {
     'bill': BILL_TRANSLATIONS,
     'budget': BUDGET_TRANSLATIONS,
     'shopping': SHOPPING_TRANSLATIONS,
-    'tracking': TRACKING_TRANSLATIONS
-    
-    
+    'tracking': TRACKING_TRANSLATIONS,
     # General Tools
-    'general': GENERAL_TRANSLATIONS,
+    'general': GENERAL_TRANSLATIONS
 }
 
 # Map key prefixes to module names
