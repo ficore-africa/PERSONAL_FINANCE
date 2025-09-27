@@ -61,18 +61,13 @@ def index():
                 'description': form.description.data,
                 'timestamp': form.transaction_date.data,
                 'status': 'completed',
+                'session_id': session.get('sid', 'tracking-session'),
                 'created_at': datetime.utcnow(),
                 'metadata': {'source': 'tracking_manual'}
             }
             transaction_id = create_transaction(
                 db=db,
-                user_id=str(current_user.id),
-                transaction_type=form.type.data,
-                category=form.category.data,
-                amount=float(form.amount.data),
-                description=form.description.data,
-                session_id=session.get('sid', 'tracking-session'),
-                metadata={'source': 'tracking_manual'}
+                transaction_data=transaction_data
             )
             if transaction_id:
                 flash(trans('tracking_transaction_created', default='Transaction logged successfully'), 'success')
