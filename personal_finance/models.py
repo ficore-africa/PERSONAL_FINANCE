@@ -596,37 +596,77 @@ def get_shopping_items(db, filter_kwargs):
                      exc_info=True, extra={'session_id': 'no-session-id'})
         raise
 
-def create_transaction(db, transaction_data):
+def create_transaction(db, user_id, transaction_type, category, amount, description, session_id, metadata, timestamp=None, status='completed'):
     """
     Create a new transaction record in the transactions collection.
     
     Args:
         db: MongoDB database instance
-        transaction_data: Dictionary containing transaction information
+        user_id: String ID of the user
+        transaction_type: Type of transaction (e.g., 'income', 'expense')
+        category: Transaction category (e.g., 'Salary', 'Food')
+        amount: Transaction amount (float or int)
+        description: Transaction description
+        session_id: Session ID for tracking
+        metadata: Dictionary containing additional metadata
+        timestamp: Transaction timestamp (optional, defaults to current time)
+        status: Transaction status (optional, defaults to 'completed')
     
     Returns:
         str: ID of the created transaction record
+    
+    Raises:
+        ValueError: If required fields are missing
+        WriteError: If MongoDB write operation fails
+        Exception: For other unexpected errors
     """
     try:
-        required_fields = ['user_id', 'type', 'category', 'amount', 'description', 'timestamp', 'status']
-        if not all(field in transaction_data for field in required_fields):
-            raise ValueError(trans('general_missing_transaction_fields', default='Missing required transaction fields'))
-        
-        # Set created_at if not provided
-        if 'created_at' not in transaction_data:
-            transaction_data['created_at'] = datetime.utcnow()
-        
+        # Validate required fields
+        required_fields = {
+            'user_id': user_id,
+            'type': transaction_type,
+            'category': category,
+            'amount': amount,
+            'description': description,
+            'status': status
+        }
+        missing_fields = [field for field, value in required_fields.items() if value is None or (isinstance(value, str) and not value.strip())]
+        if missing_fields:
+            raise ValueError(trans('general_missing_transaction_fields', default=f'Missing required transaction fields: {", ".join(missing_fields)}'))
+
+        # Ensure amount is a valid number
+        if not isinstance(amount, (int, float)) or amount < 0:
+            raise ValueError(trans('general_invalid_amount', default='Amount must be a non-negative number'))
+
+        # Construct transaction data dictionary
+        transaction_data = {
+            'user_id': str(user_id),
+            'type': transaction_type,
+            'category': category,
+            'amount': float(amount),
+            'description': description,
+            'timestamp': timestamp if timestamp else datetime.utcnow(),
+            'status': status,
+            'session_id': str(session_id) if session_id else 'no-session-id',
+            'created_at': datetime.utcnow(),
+            'metadata': metadata if isinstance(metadata, dict) else {}
+        }
+
         result = db.transactions.insert_one(transaction_data)
         logger.info(f"{trans('general_transaction_created', default='Created transaction record with ID')}: {result.inserted_id}", 
                    extra={'session_id': transaction_data.get('session_id', 'no-session-id')})
         return str(result.inserted_id)
     except WriteError as e:
         logger.error(f"{trans('general_transaction_creation_error', default='Error creating transaction record')}: {str(e)}", 
-                     exc_info=True, extra={'session_id': transaction_data.get('session_id', 'no-session-id')})
+                     exc_info=True, extra={'session_id': session_id or 'no-session-id'})
+        raise
+    except ValueError as e:
+        logger.error(f"{trans('general_transaction_creation_error', default='Error creating transaction record')}: {str(e)}", 
+                     exc_info=True, extra={'session_id': session_id or 'no-session-id'})
         raise
     except Exception as e:
         logger.error(f"{trans('general_transaction_creation_error', default='Error creating transaction record')}: {str(e)}", 
-                     exc_info=True, extra={'session_id': transaction_data.get('session_id', 'no-session-id')})
+                     exc_info=True, extra={'session_id': session_id or 'no-session-id'})
         raise
 
 def get_transactions(db, filter_kwargs, limit=None, sort_field='timestamp', sort_direction=DESCENDING):
