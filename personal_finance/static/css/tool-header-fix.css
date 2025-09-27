@@ -1,7 +1,51 @@
-/* Tool Header Breadcrumbs Fix - Prevents Shopping Icon Overflow */
-
 .tool-header {
     padding: 0 1rem;
+}
+
+.breadcrumb {
+    flex-wrap: wrap;
+    max-width: 100%;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.breadcrumb-item {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 40%;
+}
+
+.breadcrumb-item a {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+    .breadcrumb-item {
+        max-width: 30%;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .breadcrumb {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .breadcrumb-item {
+        max-width: 100%;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .breadcrumb-item {
+        font-size: 0.75rem;
+    }
 }
 
 .tool-header .btn-group {
@@ -40,7 +84,6 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Tablet styles */
 @media (max-width: 768px) {
     .tool-header .btn-group .btn {
         max-width: 28%;
@@ -54,7 +97,6 @@
     }
 }
 
-/* Mobile styles */
 @media (max-width: 576px) {
     .tool-header .btn-group {
         flex-wrap: wrap;
@@ -75,7 +117,6 @@
     }
 }
 
-/* Extra small screens */
 @media (max-width: 480px) {
     .tool-header .btn-group {
         gap: 0.3rem;
@@ -94,7 +135,6 @@
     }
 }
 
-/* Very small screens - stack vertically if needed */
 @media (max-width: 360px) {
     .tool-header .btn-group {
         flex-direction: column;
@@ -114,8 +154,7 @@
         margin-right: 0.3rem;
     }
 }
-/*
- Dark mode support for tool header */
+
 .dark-mode .tool-header .btn-group .btn {
     border-color: #4b5563;
     color: #e5e7eb;
@@ -131,4 +170,16 @@
     background-color: #3b82f6;
     border-color: #3b82f6;
     color: #ffffff;
+}
+
+.dark-mode .breadcrumb-item a {
+    color: #93c5fd;
+}
+
+.dark-mode .breadcrumb-item.text-muted {
+    color: #9ca3af;
+}
+
+.dark-mode .breadcrumb-item.active {
+    color: #e5e7eb;
 }
