@@ -49,6 +49,46 @@
                 </div>
             </a>
         </div>
+
+        <!-- Transaction Report Card (for personal users) -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('reports.transaction_report') }}" class="text-decoration-none">
+                <div class="card h-100 report-card">
+                    <div class="card-body d-flex flex-column">
+                        <div class="report-icon mb-3">
+                            <i class="fas fa-exchange-alt text-success"></i>
+                        </div>
+                        <h5 class="card-title">{{ t('reports_transaction_report', default='Transaction Report') }}</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            {{ t('reports_transaction_description', default='Generate a report of your transactions.') }}
+                        </p>
+                        <div class="mt-auto">
+                            <span class="btn btn-outline-primary btn-sm">{{ t('view_report', default='View Report') }} <i class="fas fa-arrow-right ms-1"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Net Income Report Card (for personal users) -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('reports.net_income_report') }}" class="text-decoration-none">
+                <div class="card h-100 report-card">
+                    <div class="card-body d-flex flex-column">
+                        <div class="report-icon mb-3">
+                            <i class="fas fa-money-check-alt text-warning"></i>
+                        </div>
+                        <h5 class="card-title">{{ t('reports_net_income_report', default='Net Income Report') }}</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            {{ t('reports_net_income_description', default='Generate a report of your net income (income minus expenses).') }}
+                        </p>
+                        <div class="mt-auto">
+                            <span class="btn btn-outline-primary btn-sm">{{ t('view_report', default='View Report') }} <i class="fas fa-arrow-right ms-1"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
         {% endif %}
     </div>
 </div>
