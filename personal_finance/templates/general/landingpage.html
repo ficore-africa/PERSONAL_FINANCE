@@ -9,8 +9,8 @@
         <div class="hero-actions">
             <!-- Primary Auth Actions -->
             <div class="auth-buttons">
-                <a href="{{ url_for('users.signup') }}" class="btn btn-primary btn-lg" data-bs-toggle="tooltip" data-bs-title="{{ t('general_signup_tooltip', default='Create your FiCore Africa account') | e }}">
-                    <i class="bi bi-person-plus me-2"></i>{{ t('general_signup', default='Sign Up') | e }}
+                <a href="{{ url_for('users.signup') }}" class="btn btn-primary btn-lg" data-bs-toggle="tooltip" data-bs-title="{{ t('general_signup_tooltip', default='Create your FiCore Africa account for free personal finance tracking') | e }}">
+                    <i class="bi bi-person-plus me-2"></i>{{ t('general_signup', default='Start for Free') | e }} <span class="badge bg-light text-dark ms-2"><strong>Free Personal Finance Tracking</strong></span>
                 </a>
                 <a href="{{ url_for('users.login') }}" class="btn btn-outline-primary btn-lg" data-bs-toggle="tooltip" data-bs-title="{{ t('general_login_tooltip', default='Log in to your account') | e }}">
                     <i class="bi bi-box-arrow-in-right me-2"></i>{{ t('general_login', default='Log In') | e }}
@@ -221,6 +221,18 @@
         </div>
     </div>
 
+    <!-- Call to Action -->
+    <div class="section-card mt-5 text-center">
+        <h3 class="section-title">{{ t('general_ready_to_start', default='Ready to Take Control of Your Finances?') | e }}</h3>
+        <p class="text-muted">{{ t('general_signup_prompt', default='Sign up today to access free tools for personal finance management.') | e }}</p>
+        <div class="hero-actions">
+            <div class="auth-buttons">
+                <a href="{{ url_for('users.signup') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="{{ t('general_get_started_tooltip', default='Start your financial journey for free') | e }}">{{ t('general_get_started', default='Start for Free') | e }}</a>
+                <a href="{{ url_for('users.login') }}" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="{{ t('general_login_tooltip', default='Log in to your account') | e }}">{{ t('general_login', default='Log In') | e }}</a>
+            </div>
+        </div>
+    </div>
+
     <!-- FAQ Section -->
     <div class="section-card faq-section mt-5">
         <h2 class="section-title text-center"><i class="bi bi-question-circle-fill me-2 text-primary"></i>{{ t('general_faq', default='Frequently Asked Questions') | e }}</h2>
@@ -250,6 +262,18 @@
                 </div>
             </div>
             <div class="accordion-item">
+                <h2 class="accordion-header" id="headingFreeAccess">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFreeAccess" aria-expanded="false" aria-controls="collapseFreeAccess">
+                        {{ t('general_faq_free_access', default='Is FiCore Africa free to use?') | e }}
+                    </button>
+                </h2>
+                <div id="collapseFreeAccess" class="accordion-collapse collapse" aria-labelledby="headingFreeAccess" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        {{ t('general_faq_free_access_answer', default='Yes, FiCore Africa’s personal finance tracking tools are currently free. Sign up to start managing your finances today.') | e }}
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
                 <h2 class="accordion-header" id="headingFiCoreCredits">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFiCoreCredits" aria-expanded="false" aria-controls="collapseFiCoreCredits">
                         {{ t('general_faq_ficore_credits', default='What are FiCore Credits (FCs)?') | e }}
@@ -257,7 +281,7 @@
                 </h2>
                 <div id="collapseFiCoreCredits" class="accordion-collapse collapse" aria-labelledby="headingFiCoreCredits" data-bs-parent="#faqAccordion">
                     <div class="accordion-body">
-                        {{ t('general_faq_ficore_credits_answer', default='FCs are in-app points used to access certain features on the FiCore platform, like creating budgets or tracking bills. They are not money or cryptocurrency.') | e }}
+                        {{ t('general_faq_ficore_credits_answer', default='FCs are in-app points used to access certain premium features on the FiCore platform, like advanced budgeting tools. Core features are free.') | e }}
                     </div>
                 </div>
             </div>
@@ -281,7 +305,7 @@
                 </h2>
                 <div id="collapseGetMoreFCs" class="accordion-collapse collapse" aria-labelledby="headingGetMoreFCs" data-bs-parent="#faqAccordion">
                     <div class="accordion-body">
-                        {{ t('general_faq_get_more_fcs_answer', default='You can add more FCs through your FiCore Wallet using available payment options. Look for the "Get More FCs" button in your dashboard.') | e }}
+                        {{ t('general_faq_get_more_fcs_answer', default='You can add more FCs through your FiCore Wallet using available payment options for premium features. Look for the "Get More FCs" button in your dashboard.') | e }}
                     </div>
                 </div>
             </div>
@@ -293,7 +317,7 @@
                 </h2>
                 <div id="collapseUseFCs" class="accordion-collapse collapse" aria-labelledby="headingUseFCs" data-bs-parent="#faqAccordion">
                     <div class="accordion-body">
-                        {{ t('general_faq_use_fcs_answer', default='FCs are used for actions like creating budgets, tracking bills, and managing shopping lists.') | e }}
+                        {{ t('general_faq_use_fcs_answer', default='FCs are used for premium actions like advanced budgeting, tracking bills, and managing shopping lists. Core features remain free.') | e }}
                     </div>
                 </div>
             </div>
@@ -332,23 +356,6 @@
                         {{ t('general_faq_fcs_regulated_answer', default='No. FCs are not a financial product, currency, or security. They are simply digital credits for accessing FiCore tools.') | e }}
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Call to Action -->
-    <div class="section-card mt-5 text-center">
-        <h3 class="section-title">{{ t('general_ready_to_start', default='Ready to Take Control of Your Finances?') | e }}</h3>
-        <p class="text-muted">{{ t('general_signup_prompt', default='Sign up today to access tools for personal finance management.') | e }}</p>
-        <div class="hero-actions">
-            <div class="auth-buttons">
-                <a href="{{ url_for('users.signup') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="{{ t('general_get_started_tooltip', default='Start your financial journey') | e }}">{{ t('general_get_started', default='Get Started') | e }}</a>
-                <a href="{{ url_for('users.login') }}" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-title="{{ t('general_login_tooltip', default='Log in to your account') | e }}">{{ t('general_login', default='Log In') | e }}</a>
-            </div>
-            <div class="secondary-actions">
-                <a href="https://www.ficoreafrica.com/general/waitlist" class="btn btn-outline-warning" data-bs-toggle="tooltip" data-bs-title="{{ t('general_waitlist_tooltip', default='Get early access to new features') | e }}">
-                    <i class="bi bi-star me-2"></i>{{ t('general_get_early_access', default='Get Early Access') | e }}
-                </a>
             </div>
         </div>
     </div>
@@ -418,21 +425,9 @@
     justify-content: center;
 }
 
-.secondary-actions {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
 .auth-buttons .btn {
     min-width: 140px;
     font-weight: 600;
-}
-
-.secondary-actions .btn {
-    min-width: 160px;
-    font-weight: 500;
 }
 
 /* Responsive adjustments */
@@ -446,12 +441,12 @@
 }
 
 @media (max-width: 576px) {
-    .auth-buttons, .secondary-actions {
+    .auth-buttons {
         flex-direction: column;
         width: 100%;
     }
     
-    .auth-buttons .btn, .secondary-actions .btn {
+    .auth-buttons .btn {
         width: 100%;
         min-width: auto;
     }
@@ -495,6 +490,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         } catch (error) {
             console.error('Failed to initialize carousel:', error);
+            carousel.innerHTML = '<p class="text-muted text-center">Testimonials temporarily unavailable.</p>';
         }
     }
 
@@ -506,6 +502,7 @@ document.addEventListener('DOMContentLoaded', function() {
             counter.textContent = target;
         } else {
             counter.textContent = '0';
+            console.warn('Animated counter data-count attribute missing');
         }
     }
 
