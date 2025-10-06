@@ -16,7 +16,7 @@
                     </div>
                 {% endif %}
             {% endwith %}
-            <p class="mb-3">{{ t('general_signup_description', default='Create an account to manage your personal finances with tools for budgeting, bill tracking, and shopping. Enjoy a <strong>30-day free trial</strong> with full access.') | escape }} <span class="badge bg-light text-dark ms-2"><strong>30-day free trial</strong></span></p>
+            <p class="mb-3">{{ t('general_signup_description', default='Create an account to manage your personal finances with tools for budgeting, bill tracking, and shopping. Enjoy a 30-day free trial with full access.') | escape }} <span class="badge bg-light text-dark ms-2">30-day free trial</span></p>
             <form class="validate-form needs-validation" method="POST" action="{{ url_for('users.signup') }}" novalidate aria-labelledby="signup-form-title">
                 {{ form.hidden_tag() }}
                 <div class="form-group mb-3">
@@ -59,7 +59,7 @@
                     <p>{{ t('general_agree_to_terms', default='By signing up, you agree to our') | escape }} <a href="{{ url_for('general_bp.terms') | escape }}" aria-label="{{ t('general_terms', default='Terms of Service') | escape }}">{{ t('general_terms', default='Terms of Service') | escape }}</a>.</p>
                 </div>
                 <div class="text-center">
-                    <button type="submit" class="btn btn-primary" aria-label="{{ t('general_create_account', default='Start your free trial') | escape }}">{{ t('general_create_account', default='Start your free trial') | escape }}</button>
+                    <button type="submit" class="btn btn-primary" aria-label="{{ t('general_create_account', default='Start your free ') | escape }}">{{ t('general_create_account', default='Start your free trial') | escape }}</button>
                 </div>
                 <div class="text-center mt-3">
                     <a href="{{ url_for('users.login') | escape }}" aria-label="{{ t('general_already_have_account', default='Already have an account? Sign In') | escape }}">{{ t('general_already_have_account', default='Already have an account? Sign In') | escape }}</a>
